@@ -1,0 +1,76 @@
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - binary: gitty
+    flags:
+      - -trimpath
+    ldflags: -s -w -X main.Version={{ .Version }} -X main.CommitSHA={{ .Commit }}
+    goos:
+      - linux
+      - freebsd
+      - openbsd
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - 386
+      - arm
+      - ppc64le
+    goarm:
+      - 6
+      - 7
+
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      windows: Windows
+      darwin: Darwin
+      386: i386
+      amd64: x86_64
+
+nfpms:
+  - builds:
+      - gitty
+    vendor: muesli
+    homepage: "https://fribbledom.com/"
+    maintainer: "Christian Muehlhaeuser <muesli@gmail.com>"
+    description: "Smart little CLI helper for git projects"
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+    bindir: /usr/bin
+
+brews:
+  - goarm: 6
+    tap:
+      owner: muesli
+      name: homebrew-tap
+    commit_author:
+      name: "Christian Muehlhaeuser"
+      email: "muesli@gmail.com"
+    homepage: "https://fribbledom.com/"
+    description: "Smart little CLI helper for git projects"
+    # skip_upload: true
+
+signs:
+  - artifacts: checksum
+
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
