@@ -1,5 +1,10 @@
 # gitty
 
+[![Latest Release](https://img.shields.io/github/release/muesli/gitty.svg)](https://github.com/muesli/gitty/releases)
+[![Build Status](https://github.com/muesli/gitty/workflows/build/badge.svg)](https://github.com/muesli/gitty/actions)
+[![Go ReportCard](https://goreportcard.com/badge/muesli/gitty)](https://goreportcard.com/report/muesli/gitty)
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/muesli/gitty)
+
 `gitty` is a smart little CLI helper for git projects, that shows you all the
 relevant issues, pull requests and changes at a quick glance. It currently
 only supports the GitHub API, but I'd eventually like it to become a bit more
