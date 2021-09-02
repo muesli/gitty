@@ -124,6 +124,7 @@ func printIssue(issue Issue, maxWidth int) {
 
 func printIssues(issues []Issue) {
 	headerStyle := lipgloss.NewStyle().
+		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
 	fmt.Println(headerStyle.Render(fmt.Sprintf("🐛 %d open issues", len(issues))))
