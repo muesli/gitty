@@ -36,6 +36,15 @@ func parseRepository() {
 	if len(args) > 0 {
 		arg = args[0]
 		args = args[1:]
+
+		if len(args) == 0 {
+			// only one arg provided. Is it an issue/pr number?
+			var err error
+			num, err = strconv.Atoi(arg)
+			if err == nil {
+				arg = "."
+			}
+		}
 	}
 	if len(args) > 0 {
 		var err error
