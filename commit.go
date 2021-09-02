@@ -95,6 +95,7 @@ func printCommits(repo Repo) {
 	commits := repo.LastRelease.CommitsSince
 
 	headerStyle := lipgloss.NewStyle().
+		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
 	sinceTag := repo.LastRelease.TagName

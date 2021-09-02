@@ -125,6 +125,7 @@ func printPullRequest(pr PullRequest, maxWidth int) {
 
 func printPullRequests(prs []PullRequest) {
 	headerStyle := lipgloss.NewStyle().
+		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
 	fmt.Println(headerStyle.Render(fmt.Sprintf("📌 %d open pull requests", len(prs))))
