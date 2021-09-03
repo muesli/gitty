@@ -86,14 +86,19 @@ func printCommit(commit Commit) {
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue))
+	timeStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80)
+		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80 - 7)
 
 	var s string
 	s += numberStyle.Render(commit.ID[:7])
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.String(commit.MessageHeadline, 80))
+	s += titleStyle.Render(truncate.String(commit.MessageHeadline, 80-7))
 	s += genericStyle.Render(" ")
+	s += timeStyle.Render(ago(commit.CommittedAt))
+	s += genericStyle.Render(" ")
+	s += numberStyle.Render(commit.Author)
 
 	fmt.Println(s)
 }
