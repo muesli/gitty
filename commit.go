@@ -114,11 +114,8 @@ func printCommits(repo Repo) {
 	if sinceTag == "" {
 		sinceTag = "creation"
 	}
-	if len(commits) == 0 {
-		fmt.Println(headerStyle.Render(fmt.Sprintf("🔥 No new commits since %s", sinceTag)))
-		return
-	}
-	fmt.Println(headerStyle.Render(fmt.Sprintf("🔥 %d commits since %s", len(commits), sinceTag)))
+
+	fmt.Println(headerStyle.Render(fmt.Sprintf("%s %s %s", "🔥", pluralize(len(commits), "commit since", "commits since"), sinceTag)))
 
 	// trimmed := false
 	if *maxCommits > 0 && len(commits) > *maxCommits {

@@ -127,7 +127,7 @@ func printIssues(issues []Issue) {
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
-	fmt.Println(headerStyle.Render(fmt.Sprintf("🐛 %d open issues", len(issues))))
+	fmt.Println(headerStyle.Render(fmt.Sprintf("%s %s", "🐛", pluralize(len(issues), "open issue", "open issues"))))
 
 	// trimmed := false
 	if *maxIssues > 0 && len(issues) > *maxIssues {
