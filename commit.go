@@ -33,12 +33,18 @@ type QLCommit struct {
 	OID             githubv4.GitObjectID
 	MessageHeadline githubv4.String
 	CommittedDate   githubv4.GitTimestamp
+	Author          struct {
+		User struct {
+			Login githubv4.String
+		}
+	}
 }
 
 type Commit struct {
 	ID              string
 	MessageHeadline string
 	CommittedAt     time.Time
+	Author          string
 }
 
 func history(owner string, name string, since time.Time) ([]Commit, error) {
@@ -71,6 +77,7 @@ func CommitFromQL(commit QLCommit) Commit {
 		ID:              string(commit.OID),
 		MessageHeadline: string(commit.MessageHeadline),
 		CommittedAt:     commit.CommittedDate.Time,
+		Author:          string(commit.Author.User.Login),
 	}
 }
 
