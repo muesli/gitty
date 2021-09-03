@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/truncate"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -105,7 +104,7 @@ func printIssue(issue Issue, maxWidth int) {
 	var s string
 	s += numberStyle.Render(strconv.Itoa(issue.ID))
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.String(issue.Title, uint(80-maxWidth)))
+	s += titleStyle.MaxWidth(80 - maxWidth).Render(issue.Title)
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(issue.CreatedAt))
 	s += genericStyle.Render(" ")

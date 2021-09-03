@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/truncate"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -94,7 +93,7 @@ func printCommit(commit Commit) {
 	var s string
 	s += numberStyle.Render(commit.ID[:7])
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.String(commit.MessageHeadline, 80-7))
+	s += titleStyle.MaxWidth(80 - 7).Render(commit.MessageHeadline)
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(commit.CommittedAt))
 	s += genericStyle.Render(" ")
