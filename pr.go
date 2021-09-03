@@ -128,7 +128,7 @@ func printPullRequests(prs []PullRequest) {
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
-	fmt.Println(headerStyle.Render(fmt.Sprintf("📌 %d open pull requests", len(prs))))
+	fmt.Println(headerStyle.Render(fmt.Sprintf("%s %s", "📌", pluralize(len(prs), "open pull request", "open pull requests"))))
 
 	// trimmed := false
 	if *maxPullRequests > 0 && len(prs) > *maxPullRequests {

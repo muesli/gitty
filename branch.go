@@ -103,7 +103,7 @@ func printBranches(branches []Branch) {
 		// trimmed = true
 	}
 
-	fmt.Println(headerStyle.Render(fmt.Sprintf("🌳 %d active branches", len(branches))))
+	fmt.Println(headerStyle.Render(fmt.Sprintf("%s %s", "🌳", pluralize(len(branches), "active branch", "active branches"))))
 
 	// detect max width of branch name
 	var maxWidth int

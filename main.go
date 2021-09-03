@@ -239,3 +239,13 @@ func ago(t time.Time) string {
 
 	return s
 }
+
+func pluralize(count int, singular string, plural string) string {
+	if count == 0 {
+		return fmt.Sprintf("No %s", plural)
+	} else if count == 1 {
+		return fmt.Sprintf("1 %s", singular)
+	} else {
+		return fmt.Sprintf("%d %s", count, plural)
+	}
+}
