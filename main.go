@@ -16,9 +16,11 @@ import (
 )
 
 var (
+	maxBranches     = flag.Int("max-branches", 10, "Max amount of active branches to show")
 	maxCommits      = flag.Int("max-commits", 10, "Max amount of commits to show")
 	maxIssues       = flag.Int("max-issues", 10, "Max amount of issues to show")
 	maxPullRequests = flag.Int("max-pull-requests", 10, "Max amount of pull requests to show")
+	maxBranchAge    = flag.Int("max-branch-age", 28, "Max age of a branch in days to be considered active")
 	minNewCommits   = flag.Int("min-new-commits", 1, "Min amount of new commits for a repo to be considered new")
 	skipStaleRepos  = flag.Bool("skip-stale-repos", true, "Skip repos without new activity")
 	withCommits     = flag.Bool("with-commits", false, "Show new commits")
@@ -119,6 +121,17 @@ func parseRepository() {
 		prs <- p
 	}()
 
+	// fetch active branches
+	brs := make(chan []Branch)
+	go func() {
+		b, err := branches(owner, name)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		brs <- b
+	}()
+
 	// fetch commit history
 	repo := make(chan Repo)
 	go func() {
@@ -138,6 +151,7 @@ func parseRepository() {
 
 	printIssues(<-is)
 	printPullRequests(<-prs)
+	printBranches(<-brs)
 	printCommits(<-repo)
 }
 
