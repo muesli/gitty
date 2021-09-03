@@ -57,6 +57,10 @@ gitty github.com/some/project
 The following flags are supported:
 
 ```
+  -max-branch-age int
+        Max age of a branch in days to be considered active (default 28)
+  -max-branches int
+        Max amount of active branches to show (default 10)
   -max-commits int
         Max amount of commits to show (default 10)
   -max-issues int
