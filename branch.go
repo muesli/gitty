@@ -90,7 +90,8 @@ func printBranches(branches []Branch) {
 	// filter list
 	var b []Branch
 	for _, v := range branches {
-		if v.LastCommit.CommittedAt.Before(time.Now().Add(-24 * time.Duration(*maxBranchAge) * time.Hour)) {
+		if *maxBranchAge > 0 &&
+			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
 			continue
 		}
 		b = append(b, v)
