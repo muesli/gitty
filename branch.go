@@ -55,6 +55,8 @@ func printBranch(branch Branch, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorBlue)).Width(maxWidth)
+	authorStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue))
 	timeStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
@@ -68,7 +70,7 @@ func printBranch(branch Branch, maxWidth int) {
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")
-	s += numberStyle.Render(branch.LastCommit.Author)
+	s += authorStyle.Render(branch.LastCommit.Author)
 
 	fmt.Println(s)
 }
