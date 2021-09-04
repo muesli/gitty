@@ -55,7 +55,7 @@ func printBranch(branch Branch, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorBlue)).Width(maxWidth)
+		Foreground(lipgloss.Color(theme.colorBlue))
 	timeStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
 	titleStyle := lipgloss.NewStyle().
