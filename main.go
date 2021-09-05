@@ -16,6 +16,9 @@ import (
 )
 
 var (
+	Version   = ""
+	CommitSHA = ""
+
 	maxBranches     = flag.Int("max-branches", 10, "Max amount of active branches to show")
 	maxCommits      = flag.Int("max-commits", 10, "Max amount of commits to show")
 	maxIssues       = flag.Int("max-issues", 10, "Max amount of issues to show")
@@ -25,6 +28,8 @@ var (
 	skipStaleRepos  = flag.Bool("skip-stale-repos", true, "Skip repos without new activity")
 	withCommits     = flag.Bool("with-commits", false, "Show new commits")
 	allProjects     = flag.Bool("all-projects", false, "Retrieve information for all source repositories")
+
+	version = flag.Bool("version", false, "display version")
 
 	theme Theme
 )
@@ -203,6 +208,23 @@ func parseAllProjects() {
 
 func main() {
 	flag.Parse()
+	if *version {
+		if len(CommitSHA) > 7 {
+			CommitSHA = CommitSHA[:7]
+		}
+		if Version == "" {
+			Version = "(built from source)"
+		}
+
+		fmt.Printf("gitty %s", Version)
+		if len(CommitSHA) > 0 {
+			fmt.Printf(" (%s)", CommitSHA)
+		}
+
+		fmt.Println()
+		os.Exit(0)
+	}
+
 	initTheme()
 
 	if err := initGitHub(); err != nil {
