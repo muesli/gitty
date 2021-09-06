@@ -45,7 +45,7 @@ type PullRequest struct {
 	ID        int
 	Body      string
 	Title     string
-	Labels    []Label
+	Labels    Labels
 	CreatedAt time.Time
 }
 
@@ -110,15 +110,7 @@ func printPullRequest(pr PullRequest, maxWidth int) {
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(pr.CreatedAt))
 	s += genericStyle.Render(" ")
-
-	for _, v := range pr.Labels {
-		labelStyle := lipgloss.NewStyle().
-			// Foreground(lipgloss.Color(theme.colorBlack)).
-			Foreground(lipgloss.Color("#" + v.Color))
-
-		s += labelStyle.Render(fmt.Sprintf("◖%s◗", v.Name))
-		s += genericStyle.Render(" ")
-	}
+	s += pr.Labels.View()
 
 	fmt.Println(s)
 }
