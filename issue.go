@@ -45,7 +45,7 @@ type Issue struct {
 	ID        int
 	Body      string
 	Title     string
-	Labels    []Label
+	Labels    Labels
 	CreatedAt time.Time
 }
 
@@ -109,15 +109,7 @@ func printIssue(issue Issue, maxWidth int) {
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(issue.CreatedAt))
 	s += genericStyle.Render(" ")
-
-	for _, v := range issue.Labels {
-		labelStyle := lipgloss.NewStyle().
-			// Foreground(lipgloss.Color(theme.colorBlack)).
-			Foreground(lipgloss.Color("#" + v.Color))
-
-		s += labelStyle.Render(fmt.Sprintf("◖%s◗", v.Name))
-		s += genericStyle.Render(" ")
-	}
+	s += issue.Labels.View()
 
 	fmt.Println(s)
 }
