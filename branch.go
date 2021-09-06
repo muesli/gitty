@@ -66,7 +66,7 @@ func printBranch(branch Branch, maxWidth int) {
 	var s string
 	s += numberStyle.Render(branch.Name)
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.String(branch.LastCommit.MessageHeadline, uint(80-maxWidth)))
+	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(80-maxWidth), "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")

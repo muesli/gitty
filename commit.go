@@ -94,7 +94,7 @@ func printCommit(commit Commit) {
 	var s string
 	s += numberStyle.Render(commit.ID[:7])
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.String(commit.MessageHeadline, 80-7))
+	s += titleStyle.Render(truncate.StringWithTail(commit.MessageHeadline, 80-7, "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(commit.CommittedAt))
 	s += genericStyle.Render(" ")
