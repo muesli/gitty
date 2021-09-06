@@ -8,10 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dustin/go-humanize"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -206,22 +204,26 @@ func parseAllProjects() {
 	}
 }
 
+func printVersion() {
+	if len(CommitSHA) > 7 {
+		CommitSHA = CommitSHA[:7]
+	}
+	if Version == "" {
+		Version = "(built from source)"
+	}
+
+	fmt.Printf("gitty %s", Version)
+	if len(CommitSHA) > 0 {
+		fmt.Printf(" (%s)", CommitSHA)
+	}
+
+	fmt.Println()
+}
+
 func main() {
 	flag.Parse()
 	if *version {
-		if len(CommitSHA) > 7 {
-			CommitSHA = CommitSHA[:7]
-		}
-		if Version == "" {
-			Version = "(built from source)"
-		}
-
-		fmt.Printf("gitty %s", Version)
-		if len(CommitSHA) > 0 {
-			fmt.Printf(" (%s)", CommitSHA)
-		}
-
-		fmt.Println()
+		printVersion()
 		os.Exit(0)
 	}
 
@@ -238,36 +240,4 @@ func main() {
 	}
 
 	parseRepository()
-}
-
-func ago(t time.Time) string {
-	s := humanize.Time(t)
-	if strings.Contains(s, "minute") || strings.Contains(s, "second") {
-		return "now"
-	}
-
-	s = strings.TrimSuffix(s, " ago")
-	s = strings.ReplaceAll(s, "years", "y")
-	s = strings.ReplaceAll(s, "year", "y")
-	s = strings.ReplaceAll(s, "months", "m")
-	s = strings.ReplaceAll(s, "month", "m")
-	s = strings.ReplaceAll(s, "weeks", "w")
-	s = strings.ReplaceAll(s, "week", "w")
-	s = strings.ReplaceAll(s, "days", "d")
-	s = strings.ReplaceAll(s, "day", "d")
-	s = strings.ReplaceAll(s, "hours", "h")
-	s = strings.ReplaceAll(s, "hour", "h")
-	s = strings.ReplaceAll(s, " ", "")
-
-	return s
-}
-
-func pluralize(count int, singular string, plural string) string {
-	if count == 0 {
-		return fmt.Sprintf("No %s", plural)
-	} else if count == 1 {
-		return fmt.Sprintf("1 %s", singular)
-	} else {
-		return fmt.Sprintf("%d %s", count, plural)
-	}
 }
