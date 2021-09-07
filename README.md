@@ -38,8 +38,7 @@ Compiling gitty is easy, simply run:
 
 Note: In order to access GitHub's API, `gitty` requires you to provide a valid
 GitHub token in an environment variable called either `GITHUB_TOKEN` or
-`GITTY_TOKEN`. You can create a new token in your
-[profile settings](https://github.com/settings/tokens):
+`GITTY_TOKEN`. You can [create a new token](https://github.com/settings/tokens/new?scopes=repo:status,public_repo,read:user,read:org&description=gitty) in your profile settings:
 
 `Developer settings` > `Personal access tokens` > `Generate new token`
 
