@@ -26,6 +26,7 @@ var (
 	skipStaleRepos  = flag.Bool("skip-stale-repos", true, "Skip repos without new activity")
 	withCommits     = flag.Bool("with-commits", false, "Show new commits")
 	allProjects     = flag.Bool("all-projects", false, "Retrieve information for all source repositories")
+	username        = flag.String("username", "", "GitHub username/organization name if using --all-projects")
 
 	version = flag.Bool("version", false, "display version")
 
@@ -159,7 +160,7 @@ func parseRepository() {
 }
 
 func parseAllProjects() {
-	repos, err := repositories(username)
+	repos, err := repositories(*username)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
