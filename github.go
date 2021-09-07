@@ -13,11 +13,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var (
-	username string
-	client   *githubv4.Client
-	// clientv3 *github.Client
-)
+var client *githubv4.Client
 
 func githubURL(path string) (string, error) {
 	r, err := git.PlainOpen(path)
@@ -77,15 +73,12 @@ func initGitHub() error {
 	httpClient = oauth2.NewClient(context.Background(), ts)
 	client = githubv4.NewClient(httpClient)
 
-	/*
-		tc := oauth2.NewClient(context.Background(), ts)
-		clientv3 = github.NewClient(tc)
-	*/
-
-	var err error
-	username, err = getUsername()
-	if err != nil {
-		return fmt.Errorf("Can't retrieve GitHub profile: %s", err)
+	if *username == "" {
+		u, err := getUsername()
+		if err != nil {
+			return fmt.Errorf("Can't retrieve GitHub profile: %s", err)
+		}
+		*username = u
 	}
 
 	return nil
