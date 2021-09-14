@@ -38,16 +38,15 @@ type QLIssue struct {
 }
 
 func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
-	var after *githubv4.String
 	var issues []vcs.Issue
 
-	for {
-		variables := map[string]interface{}{
-			"owner": githubv4.String(owner),
-			"name":  githubv4.String(name),
-			"after": after,
-		}
+	variables := map[string]interface{}{
+		"owner": githubv4.String(owner),
+		"name":  githubv4.String(name),
+		"after": (*githubv4.String)(nil),
+	}
 
+	for {
 		if err := c.queryWithRetry(context.Background(), &issuesQuery, variables); err != nil {
 			return issues, err
 		}
@@ -58,7 +57,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 		for _, v := range issuesQuery.Repository.Issues.Edges {
 			issues = append(issues, IssueFromQL(v.Node.QLIssue))
 
-			after = &v.Cursor
+			variables["after"] = githubv4.NewString(v.Cursor)
 		}
 	}
 
