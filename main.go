@@ -27,7 +27,7 @@ var (
 	skipStaleRepos  = flag.Bool("skip-stale-repos", true, "Skip repos without new activity")
 	withCommits     = flag.Bool("with-commits", false, "Show new commits")
 	allProjects     = flag.Bool("all-projects", false, "Retrieve information for all source repositories")
-	namespace       = flag.String("namespace", "", "Username/organization name if using --all-projects")
+	namespace       = flag.String("namespace", "", "User/organization name when using --all-projects")
 
 	version = flag.Bool("version", false, "display version")
 
