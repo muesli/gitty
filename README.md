@@ -17,6 +17,7 @@ command-line. It currently supports the GitHub & GitLab APIs.
 
 #### Linux
 - Arch Linux: [gitty](https://aur.archlinux.org/packages/gitty/)
+- Nix: `nix-env -iA nixpkgs.gitty`
 - [Packages](https://github.com/muesli/gitty/releases) in Debian & RPM formats
 
 ### Binaries
