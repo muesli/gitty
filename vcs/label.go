@@ -1,4 +1,4 @@
-package main
+package vcs
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type Labels []Label
 
 func (l Label) View() string {
 	labelStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#" + l.Color))
+		Foreground(lipgloss.Color(l.Color))
 
 	return labelStyle.Render(fmt.Sprintf("◖%s◗", l.Name))
 }

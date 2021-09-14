@@ -1,87 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dustin/go-humanize"
+	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
-	"github.com/shurcooL/githubv4"
 )
 
-var historyQuery struct {
-	Repository struct {
-		Object struct {
-			Commit struct {
-				Oid     githubv4.String
-				History struct {
-					TotalCount githubv4.Int
-					Edges      []struct {
-						Cursor githubv4.String
-						Node   struct {
-							QLCommit
-						}
-					}
-				} `graphql:"history(first: 100, since: $since)"`
-			} `graphql:"... on Commit"`
-		} `graphql:"object(expression: \"HEAD\")"`
-	} `graphql:"repository(owner: $owner, name: $name)"`
-}
-
-type QLCommit struct {
-	OID             githubv4.GitObjectID
-	MessageHeadline githubv4.String
-	CommittedDate   githubv4.GitTimestamp
-	Author          struct {
-		User struct {
-			Login githubv4.String
-		}
-	}
-}
-
-type Commit struct {
-	ID              string
-	MessageHeadline string
-	CommittedAt     time.Time
-	Author          string
-}
-
-func history(owner string, name string, since time.Time) ([]Commit, error) {
-	var commits []Commit
-
-	variables := map[string]interface{}{
-		"owner": githubv4.String(owner),
-		"name":  githubv4.String(name),
-		"since": githubv4.GitTimestamp{Time: since},
-	}
-
-	// if err := client.Query(context.Background(), &historyQuery, variables); err != nil {
-	if err := queryWithRetry(context.Background(), &historyQuery, variables); err != nil {
-		return commits, err
-	}
-
-	for _, v := range historyQuery.Repository.Object.Commit.History.Edges {
-		if v.Node.QLCommit.OID == "" {
-			// fmt.Println("Commit ID broken:", v.Node.QLCommit.OID)
-			continue
-		}
-		commits = append(commits, CommitFromQL(v.Node.QLCommit))
-	}
-
-	return commits, nil
-}
-
-func CommitFromQL(commit QLCommit) Commit {
-	return Commit{
-		ID:              string(commit.OID),
-		MessageHeadline: string(commit.MessageHeadline),
-		CommittedAt:     commit.CommittedDate.Time,
-		Author:          string(commit.Author.User.Login),
-	}
-}
-
-func printCommit(commit Commit) {
+func printCommit(commit vcs.Commit) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
@@ -103,19 +31,28 @@ func printCommit(commit Commit) {
 	fmt.Println(s)
 }
 
-func printCommits(repo Repo) {
+func printCommits(repo vcs.Repo) {
 	commits := repo.LastRelease.CommitsSince
 
-	headerStyle := lipgloss.NewStyle().
-		PaddingTop(1).
-		Foreground(lipgloss.Color(theme.colorMagenta))
+	// dimColor := gamut.ToHex(gamut.Darker(gamut.Hex(theme.colorMagenta), 0.40))
 
+	headerStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorMagenta))
+	// headerDimStyle := lipgloss.NewStyle().
+	// 	Foreground(lipgloss.Color(dimColor))
 	sinceTag := repo.LastRelease.TagName
 	if sinceTag == "" {
 		sinceTag = "creation"
 	}
 
-	fmt.Println(headerStyle.Render(fmt.Sprintf("%s %s %s", "🔥", pluralize(len(commits), "commit since", "commits since"), sinceTag)))
+	fmt.Printf("\n🔥 %s %s\n",
+		headerStyle.Render(fmt.Sprintf("%s %s",
+			pluralize(len(commits), "commit since", "commits since"),
+			sinceTag)),
+
+		headerStyle.Render(fmt.Sprintf("(%s)",
+			humanize.Time(repo.LastRelease.PublishedAt))),
+	)
 
 	// trimmed := false
 	if *maxCommits > 0 && len(commits) > *maxCommits {

@@ -6,45 +6,10 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
-	"github.com/shurcooL/githubv4"
+	"github.com/muesli/gitty/vcs"
 )
 
-var recentReleasesQuery struct {
-	User struct {
-		Login                     githubv4.String
-		RepositoriesContributedTo struct {
-			TotalCount githubv4.Int
-			Edges      []struct {
-				Cursor githubv4.String
-				Node   struct {
-					QLRepository
-					Releases QLRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
-				}
-			}
-		} `graphql:"repositoriesContributedTo(first: 100, after:$after includeUserRepositories: true, contributionTypes: COMMIT)"`
-	} `graphql:"user(login:$username)"`
-}
-
-type QLRelease struct {
-	Nodes []struct {
-		Name         githubv4.String
-		TagName      githubv4.String
-		PublishedAt  githubv4.DateTime
-		URL          githubv4.String
-		IsPrerelease githubv4.Boolean
-		IsDraft      githubv4.Boolean
-	}
-}
-
-type Release struct {
-	Name         string
-	TagName      string
-	PublishedAt  time.Time
-	URL          string
-	CommitsSince []Commit
-}
-
-func repoRelease(repo Repo) {
+func repoRelease(repo vcs.Repo) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	repoStyle := lipgloss.NewStyle().
@@ -55,8 +20,6 @@ func repoRelease(repo Repo) {
 		Foreground(lipgloss.Color(theme.colorGreen))
 	changesStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen))
-	commitStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorDarkGray))
 
 	day := time.Hour * 24
 	week := day * 7
@@ -95,41 +58,17 @@ func repoRelease(repo Repo) {
 	s += genericStyle.Render(", ")
 	s += changesStyle.Render(fmt.Sprintf("%d new commits since", len(repo.LastRelease.CommitsSince)))
 	s += genericStyle.Render(")")
+	fmt.Println(s)
 
 	if *withCommits && len(repo.LastRelease.CommitsSince) > 0 {
-		s += "\n"
 		for i, commit := range repo.LastRelease.CommitsSince {
 			if i >= *maxCommits && *maxCommits > 0 {
 				break
 			}
 
-			s += commitStyle.Render(commit.ID[0:7]) + " "
-			s += commitStyle.Render(commit.MessageHeadline) + "\n"
-		}
-	}
-
-	fmt.Println(s)
-}
-
-func reposWithRelease(repos []Repo) []Repo {
-	var r []Repo
-
-	for _, repo := range repos {
-		if repo.LastRelease.PublishedAt.IsZero() {
-			continue
+			printCommit(commit)
 		}
 
-		r = append(r, repo)
-	}
-
-	return r
-}
-
-func ReleaseFromQL(release QLRelease) Release {
-	return Release{
-		Name:        string(release.Nodes[0].Name),
-		TagName:     string(release.Nodes[0].TagName),
-		PublishedAt: release.Nodes[0].PublishedAt.Time,
-		URL:         string(release.Nodes[0].URL),
+		fmt.Println()
 	}
 }
