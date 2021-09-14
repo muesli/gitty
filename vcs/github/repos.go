@@ -72,15 +72,14 @@ func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 }
 
 func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
-	var after *githubv4.String
 	var repos []vcs.Repo
 
-	for {
-		variables := map[string]interface{}{
-			"username": githubv4.String(owner),
-			"after":    after,
-		}
+	variables := map[string]interface{}{
+		"username": githubv4.String(owner),
+		"after":    (*githubv4.String)(nil),
+	}
 
+	for {
 		if err := c.queryWithRetry(context.Background(), &reposQuery, variables); err != nil {
 			return nil, err
 		}
@@ -96,7 +95,7 @@ func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 
 			repos = append(repos, repo)
 
-			after = &v.Cursor
+			variables["after"] = githubv4.NewString(v.Cursor)
 		}
 	}
 

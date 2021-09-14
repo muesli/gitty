@@ -38,16 +38,15 @@ type QLPullRequest struct {
 }
 
 func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, error) {
-	var after *githubv4.String
 	var pullRequests []vcs.PullRequest
 
-	for {
-		variables := map[string]interface{}{
-			"owner": githubv4.String(owner),
-			"name":  githubv4.String(name),
-			"after": after,
-		}
+	variables := map[string]interface{}{
+		"owner": githubv4.String(owner),
+		"name":  githubv4.String(name),
+		"after": (*githubv4.String)(nil),
+	}
 
+	for {
 		if err := c.queryWithRetry(context.Background(), &pullRequestQuery, variables); err != nil {
 			return pullRequests, err
 		}
@@ -58,7 +57,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 		for _, v := range pullRequestQuery.Repository.PullRequests.Edges {
 			pullRequests = append(pullRequests, PullRequestFromQL(v.Node.QLPullRequest))
 
-			after = &v.Cursor
+			variables["after"] = githubv4.NewString(v.Cursor)
 		}
 	}
 
