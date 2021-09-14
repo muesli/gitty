@@ -6,9 +6,8 @@
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/muesli/gitty)
 
 `gitty` is a smart little CLI helper for git projects, that shows you all the
-relevant issues, pull requests and changes at a quick glance. It currently
-only supports the GitHub API, but I'd eventually like it to become a bit more
-agnostic.
+relevant issues, pull requests and changes at a quick glance, right on the
+command-line. It currently supports the GitHub & GitLab APIs.
 
 ![Screenshot](screenshot.png)
 
@@ -25,7 +24,7 @@ agnostic.
 
 ### From source
 
-Make sure you have a working Go environment (Go 1.12 or higher is required).
+Make sure you have a working Go environment (Go 1.13 or higher is required).
 See the [install instructions](http://golang.org/doc/install.html).
 
 Compiling gitty is easy, simply run:
@@ -36,28 +35,42 @@ Compiling gitty is easy, simply run:
 
 ## Usage
 
-Note: In order to access GitHub's API, `gitty` requires you to provide a valid
-GitHub token in an environment variable called either `GITHUB_TOKEN` or
-`GITTY_TOKEN`. You can [create a new token](https://github.com/settings/tokens/new?scopes=repo:status,public_repo,read:user,read:org&description=gitty) in your profile settings:
+### Access Tokens
 
-`Developer settings` > `Personal access tokens` > `Generate new token`
+Note: In order to access the APIs of hosting providers like GitHub or GitLab,
+`gitty` requires you to provide valid access tokens in an environment variable
+called `GITTY_TOKENS`.
+
+You can provide tokens for multiple hosts and services in this format:
+
+`github.com=abc123;gitlab.com=xyz890;myhost.tld=...`
+
+#### GitHub
+
+You can [create a new token](https://github.com/settings/tokens/new?scopes=repo:status,public_repo,read:user,read:org&description=gitty)
+in your profile settings:
+Developer settings > Personal access tokens > Generate new token
 
 Make sure to enable the `repo:status`, `public_repo`, `read:user`, and
 `read:org` permissions in particular.
 
+#### GitLab
+
+You can create a new token in your profile settings:
+User Settings > Access Tokens
+
+Make sure to enable the `read_user`, `read_api`, and `read_repository`
+permissions.
+
 ### Basic usage
 
-You can start `gitty` with either a path or a GitHub URL as an argument. If no
-argument was provided, `gitty` will operate on the current working directory.
+You can start `gitty` with either a path or a URL as an argument. If no argument
+was provided, `gitty` will operate on the current working directory.
 
 ```bash
-gitty /some/repo
-```
-
-or
-
-```bash
-gitty github.com/some/project
+$ gitty /some/repo
+$ gitty github.com/some/project
+$ gitty https://myhost.tld/some/project
 ```
 
 The following flags are supported:
@@ -81,5 +94,5 @@ If you launch `gitty` with the ID of an issue or pull request, it will open the
 issue or pull request in your browser:
 
 ```bash
-gitty /some/repo 42
+gitty [PATH|URL] 42
 ```

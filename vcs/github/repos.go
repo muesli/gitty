@@ -1,8 +1,9 @@
-package main
+package github
 
 import (
 	"context"
 
+	"github.com/muesli/gitty/vcs"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -52,27 +53,14 @@ type QLRepository struct {
 	Releases QLRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
 }
 
-type Repo struct {
-	Owner         string
-	Name          string
-	NameWithOwner string
-	URL           string
-	Description   string
-	Stargazers    int
-	Watchers      int
-	Forks         int
-	Commits       int
-	LastRelease   Release
-}
-
-func repository(owner string, name string) (Repo, error) {
+func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 	variables := map[string]interface{}{
 		"owner": githubv4.String(owner),
 		"name":  githubv4.String(name),
 	}
 
-	if err := queryWithRetry(context.Background(), &repoQuery, variables); err != nil {
-		return Repo{}, err
+	if err := c.queryWithRetry(context.Background(), &repoQuery, variables); err != nil {
+		return vcs.Repo{}, err
 	}
 
 	repo := RepoFromQL(repoQuery.Repository)
@@ -83,9 +71,9 @@ func repository(owner string, name string) (Repo, error) {
 	return repo, nil
 }
 
-func repositories(owner string) ([]Repo, error) {
+func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 	var after *githubv4.String
-	var repos []Repo
+	var repos []vcs.Repo
 
 	for {
 		variables := map[string]interface{}{
@@ -93,7 +81,7 @@ func repositories(owner string) ([]Repo, error) {
 			"after":    after,
 		}
 
-		if err := queryWithRetry(context.Background(), &reposQuery, variables); err != nil {
+		if err := c.queryWithRetry(context.Background(), &reposQuery, variables); err != nil {
 			return nil, err
 		}
 		if len(reposQuery.User.Repositories.Edges) == 0 {
@@ -115,8 +103,8 @@ func repositories(owner string) ([]Repo, error) {
 	return repos, nil
 }
 
-func RepoFromQL(repo QLRepository) Repo {
-	return Repo{
+func RepoFromQL(repo QLRepository) vcs.Repo {
+	return vcs.Repo{
 		Owner:         string(repo.Owner.Login),
 		Name:          string(repo.Name),
 		NameWithOwner: string(repo.NameWithOwner),

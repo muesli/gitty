@@ -1,57 +1,17 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
-	"github.com/shurcooL/githubv4"
 )
 
-var branchesQuery struct {
-	Repository struct {
-		Refs struct {
-			Nodes []struct {
-				Name   githubv4.String
-				Target struct {
-					Commit QLCommit `graphql:"... on Commit"`
-				}
-			}
-		} `graphql:"refs(first: 100, refPrefix: \"refs/heads/\")"`
-	} `graphql:"repository(owner: $owner, name: $name)"`
-}
-
-type Branch struct {
-	Name       string
-	LastCommit Commit
-}
-
-func branches(owner string, name string) ([]Branch, error) {
-	variables := map[string]interface{}{
-		"owner": githubv4.String(owner),
-		"name":  githubv4.String(name),
-	}
-
-	if err := queryWithRetry(context.Background(), &branchesQuery, variables); err != nil {
-		return nil, err
-	}
-
-	var branches []Branch
-	for _, node := range branchesQuery.Repository.Refs.Nodes {
-		branches = append(branches, Branch{
-			Name:       string(node.Name),
-			LastCommit: CommitFromQL(node.Target.Commit),
-		})
-	}
-
-	return branches, nil
-}
-
-func printBranch(branch Branch, maxWidth int) {
+func printBranch(branch vcs.Branch, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
@@ -75,7 +35,7 @@ func printBranch(branch Branch, maxWidth int) {
 	fmt.Println(s)
 }
 
-func printBranches(branches []Branch) {
+func printBranches(branches []vcs.Branch) {
 	headerStyle := lipgloss.NewStyle().
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
@@ -88,7 +48,7 @@ func printBranches(branches []Branch) {
 	})
 
 	// filter list
-	var b []Branch
+	var b []vcs.Branch
 	for _, v := range branches {
 		if *maxBranchAge > 0 &&
 			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {

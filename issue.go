@@ -1,98 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
-	"github.com/shurcooL/githubv4"
 )
 
-var issuesQuery struct {
-	Repository struct {
-		Issues struct {
-			TotalCount githubv4.Int
-			Edges      []struct {
-				Cursor githubv4.String
-				Node   struct {
-					QLIssue
-				}
-			}
-		} `graphql:"issues(first: 100, after: $after, states: OPEN, orderBy: {field: CREATED_AT, direction: DESC})"`
-	} `graphql:"repository(owner: $owner, name: $name)"`
-}
-
-type QLIssue struct {
-	Number    githubv4.Int
-	Body      githubv4.String
-	Title     githubv4.String
-	CreatedAt githubv4.DateTime
-	Labels    struct {
-		Edges []struct {
-			Cursor githubv4.String
-			Node   struct {
-				Name  githubv4.String
-				Color githubv4.String
-			}
-		}
-	} `graphql:"labels(first: 100, orderBy: {field: NAME, direction: ASC})"`
-}
-
-type Issue struct {
-	ID        int
-	Body      string
-	Title     string
-	Labels    Labels
-	CreatedAt time.Time
-}
-
-func issues(owner string, name string) ([]Issue, error) {
-	var after *githubv4.String
-	var issues []Issue
-
-	for {
-		variables := map[string]interface{}{
-			"owner": githubv4.String(owner),
-			"name":  githubv4.String(name),
-			"after": after,
-		}
-
-		if err := queryWithRetry(context.Background(), &issuesQuery, variables); err != nil {
-			return issues, err
-		}
-		if len(issuesQuery.Repository.Issues.Edges) == 0 {
-			break
-		}
-
-		for _, v := range issuesQuery.Repository.Issues.Edges {
-			issues = append(issues, IssueFromQL(v.Node.QLIssue))
-
-			after = &v.Cursor
-		}
-	}
-
-	return issues, nil
-}
-
-func IssueFromQL(issue QLIssue) Issue {
-	i := Issue{
-		ID:        int(issue.Number),
-		Body:      string(issue.Body),
-		Title:     string(issue.Title),
-		CreatedAt: issue.CreatedAt.Time,
-	}
-
-	for _, v := range issue.Labels.Edges {
-		i.Labels = append(i.Labels, Label{string(v.Node.Name), string(v.Node.Color)})
-	}
-
-	return i
-}
-
-func printIssue(issue Issue, maxWidth int) {
+func printIssue(issue vcs.Issue, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
@@ -114,7 +31,7 @@ func printIssue(issue Issue, maxWidth int) {
 	fmt.Println(s)
 }
 
-func printIssues(issues []Issue) {
+func printIssues(issues []vcs.Issue) {
 	headerStyle := lipgloss.NewStyle().
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))

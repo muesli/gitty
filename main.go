@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/gitty/vcs"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -26,7 +27,7 @@ var (
 	skipStaleRepos  = flag.Bool("skip-stale-repos", true, "Skip repos without new activity")
 	withCommits     = flag.Bool("with-commits", false, "Show new commits")
 	allProjects     = flag.Bool("all-projects", false, "Retrieve information for all source repositories")
-	username        = flag.String("username", "", "GitHub username/organization name if using --all-projects")
+	namespace       = flag.String("namespace", "", "Username/organization name if using --all-projects")
 
 	version = flag.Bool("version", false, "display version")
 
@@ -62,31 +63,28 @@ func parseRepository() {
 		args = args[1:]
 	}
 
-	// parse GitHub URL from args
-	var u string
-	origin, err := repoOrigin(arg)
+	// parse URL from args
+	host, owner, name, err := parseRepo(arg)
 	if err != nil {
-		if !strings.Contains(arg, "github.com/") {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		u = cleanupUrl(arg)
-		origin = u + ".git"
-	} else {
-		u, err = githubURL(arg)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		fmt.Println(err)
+		os.Exit(1)
 	}
+	// fmt.Printf("Host: %s, Owner: %s, Name: %s\n", host, owner, name)
 
-	p := strings.Split(u, "/")
-	owner, name := p[3], p[4]
+	// guess appropriate API client from hostname
+	client, err := guessClient(host)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	// launched with issue/pr number?
 	if num > 0 {
-		iu := fmt.Sprintf("https://github.com/%s/%s/issues/%d", owner, name, num)
+		iu := client.IssueURL(owner, name, num)
+		if len(iu) == 0 {
+			fmt.Printf("Issue/PR %d not found\n", num)
+			os.Exit(1)
+		}
 		if err := open.Start(iu); err != nil {
 			fmt.Println("URL:", iu)
 		}
@@ -98,15 +96,14 @@ func parseRepository() {
 	tooltipStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorTooltip))
 
-	_ = origin
 	// fmt.Println(tooltipStyle.Render("🏠 Remote ") + headerStyle.Render(origin))
 	// fmt.Println(tooltipStyle.Render("🔖 Website ") + headerStyle.Render(u))
-	fmt.Println(tooltipStyle.Render("🏠 Repository ") + headerStyle.Render(u))
+	fmt.Println(tooltipStyle.Render("🏠 Repository ") + headerStyle.Render("https://"+host+"/"+owner+"/"+name))
 
 	// fetch issues
-	is := make(chan []Issue)
+	is := make(chan []vcs.Issue)
 	go func() {
-		i, err := issues(owner, name)
+		i, err := client.Issues(owner, name)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -115,9 +112,9 @@ func parseRepository() {
 	}()
 
 	// fetch pull requests
-	prs := make(chan []PullRequest)
+	prs := make(chan []vcs.PullRequest)
 	go func() {
-		p, err := pullRequests(owner, name)
+		p, err := client.PullRequests(owner, name)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -126,9 +123,9 @@ func parseRepository() {
 	}()
 
 	// fetch active branches
-	brs := make(chan []Branch)
+	brs := make(chan []vcs.Branch)
 	go func() {
-		b, err := branches(owner, name)
+		b, err := client.Branches(owner, name)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -137,15 +134,15 @@ func parseRepository() {
 	}()
 
 	// fetch commit history
-	repo := make(chan Repo)
+	repo := make(chan vcs.Repo)
 	go func() {
-		r, err := repository(owner, name)
+		r, err := client.Repository(owner, name)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		r.LastRelease.CommitsSince, err = history(r.Owner, r.Name, r.LastRelease.PublishedAt)
+		r.LastRelease.CommitsSince, err = client.History(r.Owner, r.Name, *maxCommits, r.LastRelease.PublishedAt)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -160,7 +157,28 @@ func parseRepository() {
 }
 
 func parseAllProjects() {
-	repos, err := repositories(*username)
+	args := flag.Args()
+	if len(args) == 0 {
+		fmt.Println("Please provide the hostname of a git provider, e.g. github.com")
+		os.Exit(1)
+	}
+
+	client, err := guessClient(args[0])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if *namespace == "" {
+		u, err := client.GetUsername()
+		if err != nil {
+			fmt.Printf("Can't retrieve profile: %s\n", err)
+			os.Exit(1)
+		}
+		*namespace = u
+	}
+
+	repos, err := client.Repositories(*namespace)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -168,15 +186,15 @@ func parseAllProjects() {
 
 	wg := &sync.WaitGroup{}
 	mut := &sync.Mutex{}
-	var rr []Repo
+	var rr []vcs.Repo
 
 	// repos with a release
-	for _, repo := range reposWithRelease(repos) {
+	for _, repo := range vcs.ReposWithRelease(repos) {
 		wg.Add(1)
 
-		go func(repo Repo) {
+		go func(repo vcs.Repo) {
 			var err error
-			repo.LastRelease.CommitsSince, err = history(repo.Owner, repo.Name, repo.LastRelease.PublishedAt)
+			repo.LastRelease.CommitsSince, err = client.History(repo.Owner, repo.Name, *maxCommits, repo.LastRelease.PublishedAt)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -229,11 +247,6 @@ func main() {
 	}
 
 	initTheme()
-
-	if err := initGitHub(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 
 	if *allProjects {
 		parseAllProjects()
