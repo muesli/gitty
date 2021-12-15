@@ -95,5 +95,21 @@ If you launch `gitty` with the ID of an issue or pull request, it will open the
 issue or pull request in your browser:
 
 ```bash
-gitty [PATH|URL] 42
+$ gitty [PATH|URL] 42
+```
+
+### Monitoring entire namespaces
+
+gitty also lets you monitor entire namespaces, giving you an overview of all its
+repositories:
+
+```bash
+$ gitty --all-projects github.com
+```
+
+Per default it will show the projects of the token owner, but you can also
+retrieve the projects of other namespaces:
+
+```bash
+$ gitty --all-projects --namespace muesli github.com
 ```
