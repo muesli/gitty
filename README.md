@@ -25,7 +25,7 @@ command-line. It currently supports the GitHub & GitLab APIs.
 
 ### From source
 
-Make sure you have a working Go environment (Go 1.13 or higher is required).
+Make sure you have a working Go environment (Go 1.14 or higher is required).
 See the [install instructions](http://golang.org/doc/install.html).
 
 Compiling gitty is easy, simply run:
