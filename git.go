@@ -61,7 +61,7 @@ func tokenForHost(host string) string {
 func guessClient(host string) (Client, error) {
 	token := tokenForHost(host)
 	if len(token) == 0 {
-		return nil, fmt.Errorf("please set a GITTY_TOKENS env var")
+		return nil, fmt.Errorf("please set a GITTY_TOKENS env var for host " + host)
 	}
 
 	if strings.EqualFold(host, "github.com") {
