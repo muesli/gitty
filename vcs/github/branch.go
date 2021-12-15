@@ -30,7 +30,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 		return nil, err
 	}
 
-	var branches []vcs.Branch
+	var branches []vcs.Branch //nolint
 	for _, node := range branchesQuery.Repository.Refs.Nodes {
 		branches = append(branches, vcs.Branch{
 			Name:       string(node.Name),

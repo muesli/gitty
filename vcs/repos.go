@@ -14,7 +14,7 @@ type Repo struct {
 }
 
 func ReposWithRelease(repos []Repo) []Repo {
-	var r []Repo
+	var r []Repo //nolint
 
 	for _, repo := range repos {
 		if repo.LastRelease.PublishedAt.IsZero() {

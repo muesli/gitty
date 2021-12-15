@@ -39,7 +39,7 @@ type QLCommit struct {
 }
 
 func (c *Client) History(owner string, name string, max int, since time.Time) ([]vcs.Commit, error) {
-	var commits []vcs.Commit
+	var commits []vcs.Commit //nolint
 
 	variables := map[string]interface{}{
 		"owner": githubv4.String(owner),

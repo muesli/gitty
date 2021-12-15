@@ -48,7 +48,7 @@ func printBranches(branches []vcs.Branch) {
 	})
 
 	// filter list
-	var b []vcs.Branch
+	var b []vcs.Branch //nolint
 	for _, v := range branches {
 		if *maxBranchAge > 0 &&
 			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
