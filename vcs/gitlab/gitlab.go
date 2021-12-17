@@ -232,7 +232,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 	return i, nil
 }
 
-func (c *Client) History(owner string, name string, max int, since time.Time) ([]vcs.Commit, error) {
+func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit, error) {
 	var commits []vcs.Commit
 
 	page := 0
@@ -246,7 +246,7 @@ func (c *Client) History(owner string, name string, max int, since time.Time) ([
 		if !since.IsZero() {
 			opt.Since = &since
 		}
-		h, resp, err := c.api.Commits.ListCommits(owner+"/"+name, &opt)
+		h, resp, err := c.api.Commits.ListCommits(repo.NameWithOwner, &opt)
 		if err != nil {
 			return nil, err
 		}
@@ -300,7 +300,7 @@ func (c *Client) repoFromAPI(p *gitlab.Project) vcs.Repo {
 	return vcs.Repo{
 		Owner:         p.Namespace.Path,
 		Name:          p.Name,
-		NameWithOwner: p.NameWithNamespace,
+		NameWithOwner: p.PathWithNamespace,
 		URL:           p.WebURL,
 		Description:   p.Description,
 		Stargazers:    p.StarCount,

@@ -19,7 +19,7 @@ type Client interface {
 	Repository(owner string, name string) (vcs.Repo, error)
 	Repositories(owner string) ([]vcs.Repo, error)
 	Branches(owner string, name string) ([]vcs.Branch, error)
-	History(owner string, name string, max int, since time.Time) ([]vcs.Commit, error)
+	History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit, error)
 
 	GetUsername() (string, error)
 	IssueURL(owner string, name string, number int) string
