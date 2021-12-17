@@ -142,7 +142,7 @@ func parseRepository() {
 			os.Exit(1)
 		}
 
-		r.LastRelease.CommitsSince, err = client.History(r.Owner, r.Name, *maxCommits, r.LastRelease.PublishedAt)
+		r.LastRelease.CommitsSince, err = client.History(r, *maxCommits, r.LastRelease.PublishedAt)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -194,7 +194,7 @@ func parseAllProjects() {
 
 		go func(repo vcs.Repo) {
 			var err error
-			repo.LastRelease.CommitsSince, err = client.History(repo.Owner, repo.Name, *maxCommits, repo.LastRelease.PublishedAt)
+			repo.LastRelease.CommitsSince, err = client.History(repo, *maxCommits, repo.LastRelease.PublishedAt)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
