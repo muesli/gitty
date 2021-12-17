@@ -59,7 +59,7 @@ func (c *Client) GetUsername() (string, error) {
 func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 	var i []vcs.Issue
 
-	page := 0
+	page := 1
 	for {
 		issues, resp, err := c.api.Issues.ListProjectIssues(owner+"/"+name,
 			&gitlab.ListProjectIssuesOptions{
@@ -100,7 +100,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, error) {
 	var i []vcs.PullRequest
 
-	page := 0
+	page := 1
 	for {
 		prs, resp, err := c.api.MergeRequests.ListProjectMergeRequests(owner+"/"+name,
 			&gitlab.ListProjectMergeRequestsOptions{
@@ -151,7 +151,7 @@ func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 	var repos []vcs.Repo
 
-	page := 0
+	page := 1
 	for {
 		p, resp, err := c.api.Groups.ListGroupProjects(owner, &gitlab.ListGroupProjectsOptions{
 			ListOptions: gitlab.ListOptions{
@@ -235,7 +235,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit, error) {
 	var commits []vcs.Commit
 
-	page := 0
+	page := 1
 	for {
 		opt := gitlab.ListCommitsOptions{
 			ListOptions: gitlab.ListOptions{
