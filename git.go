@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/kevinburke/ssh_config"
 	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/gitty/vcs/gitea"
 	"github.com/muesli/gitty/vcs/github"
@@ -126,6 +127,8 @@ func originURL(path string) (string, error) {
 }
 
 func cleanupURL(arg string) (string, error) {
+	var sshURL bool
+
 	if strings.Contains(arg, "://") {
 		u, err := url.Parse(arg)
 		if err == nil {
@@ -136,9 +139,9 @@ func cleanupURL(arg string) (string, error) {
 				arg = u.String()
 			}
 		}
-
 		arg = strings.Split(arg, "://")[1]
 	} else {
+		sshURL = true
 		arg = strings.ReplaceAll(arg, ":", "/")
 	}
 
@@ -146,6 +149,14 @@ func cleanupURL(arg string) (string, error) {
 	u, err := url.Parse(arg)
 	if err != nil {
 		return "", err
+	}
+
+	// SSH URLs support stanzas we need to resolve.
+	if sshURL {
+		nh := ssh_config.Get(u.Hostname(), "Hostname")
+		if nh != "" {
+			u.Host = nh
+		}
 	}
 
 	u.Path = strings.TrimSuffix(u.Path, ".git")

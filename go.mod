@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351
 	github.com/muesli/gamut v0.2.1-0.20210907032934-daa621f1be71
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.9.0
