@@ -7,7 +7,7 @@
 
 `gitty` is a smart little CLI helper for git projects, that shows you all the
 relevant issues, pull requests and changes at a quick glance, right on the
-command-line. It currently supports the GitHub & GitLab APIs.
+command-line. It currently supports the GitHub, GitLab, and Gitea APIs.
 
 ![Screenshot](screenshot.png)
 
@@ -38,9 +38,9 @@ Compiling gitty is easy, simply run:
 
 ### Access Tokens
 
-Note: In order to access the APIs of hosting providers like GitHub or GitLab,
-`gitty` requires you to provide valid access tokens in an environment variable
-called `GITTY_TOKENS`.
+Note: In order to access the APIs of hosting providers like GitHub, GitLab, or
+Gitea, `gitty` requires you to provide valid access tokens in an environment
+variable called `GITTY_TOKENS`.
 
 You can provide tokens for multiple hosts and services in this format:
 
@@ -62,6 +62,11 @@ User Settings > Access Tokens
 
 Make sure to enable the `read_user`, `read_api`, and `read_repository`
 permissions.
+
+#### Gitea
+
+You can create a new token in your profile settings:
+Settings > Applications > Manage Access Tokens
 
 ### Basic usage
 
