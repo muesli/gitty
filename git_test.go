@@ -11,6 +11,7 @@ func TestCleanupURL(t *testing.T) {
 		{"git://github.com/muesli/gitty.git", "https://github.com/muesli/gitty"},
 		{"http://github.com/muesli/gitty.git", "https://github.com/muesli/gitty"},
 		{"https://github.com/muesli/gitty", "https://github.com/muesli/gitty"},
+		{"ssh://git@git.domain.tld:2222/muesli/gitty.git", "https://git.domain.tld/muesli/gitty"},
 	}
 
 	for _, test := range tests {
