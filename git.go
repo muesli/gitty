@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strings"
@@ -112,11 +113,22 @@ func originURL(path string) (string, error) {
 
 func cleanupURL(arg string) (string, error) {
 	if strings.Contains(arg, "://") {
-		arg = strings.Split(arg, "://")[1]
-	}
-	arg = strings.ReplaceAll(arg, ":", "/")
-	arg = "https://" + arg
+		u, err := url.Parse(arg)
+		if err == nil {
+			host, _, err := net.SplitHostPort(u.Host)
+			if err == nil {
+				// strip port
+				u.Host = host
+				arg = u.String()
+			}
+		}
 
+		arg = strings.Split(arg, "://")[1]
+	} else {
+		arg = strings.ReplaceAll(arg, ":", "/")
+	}
+
+	arg = "https://" + arg
 	u, err := url.Parse(arg)
 	if err != nil {
 		return "", err
