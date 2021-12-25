@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/muesli/gitty/vcs"
+	"github.com/muesli/gitty/vcs/gitea"
 	"github.com/muesli/gitty/vcs/github"
 	"github.com/muesli/gitty/vcs/gitlab"
 )
@@ -71,14 +72,24 @@ func guessClient(host string) (Client, error) {
 	if strings.EqualFold(host, "gitlab.com") {
 		return gitlab.NewClient(host, token, true)
 	}
+	if strings.EqualFold(host, "gitea.com") {
+		return gitea.NewClient(host, token, true)
+	}
 	if strings.Contains(host, "invent.kde.org") {
 		return gitlab.NewClient(host, token, true)
 	}
 
-	client, err := gitlab.NewClient(host, token, false)
+	var client Client
+	var err error
+	client, err = gitlab.NewClient(host, token, false)
 	if err == nil {
 		return client, nil
 	}
+	client, err = gitea.NewClient(host, token, false)
+	if err == nil {
+		return client, nil
+	}
+	// fmt.Println(err)
 
 	return nil, fmt.Errorf("not a recognized git provider")
 }
