@@ -59,6 +59,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 				Page:     page,
 				PageSize: 250,
 			},
+			State: gitea.StateOpen,
 		})
 		if err != nil {
 			return nil, err
