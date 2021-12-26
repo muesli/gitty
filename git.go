@@ -75,6 +75,9 @@ func guessClient(host string) (Client, error) {
 	if strings.EqualFold(host, "gitea.com") {
 		return gitea.NewClient(host, token, true)
 	}
+	if strings.EqualFold(host, "codeberg.org") {
+		return gitea.NewClient(host, token, true)
+	}
 	if strings.Contains(host, "invent.kde.org") {
 		return gitlab.NewClient(host, token, true)
 	}
