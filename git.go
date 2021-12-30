@@ -182,6 +182,6 @@ func parseRepo(arg string) (string, string, string, error) {
 		return "", "", "", fmt.Errorf("does not look like a valid path or URL")
 	}
 
-	host, owner, name := p[2], p[3], p[4]
+	host, owner, name := p[2], p[3], strings.Join(p[4:], "/")
 	return host, owner, name, nil
 }
