@@ -64,7 +64,7 @@ func parseRepository() {
 	}
 
 	// parse URL from args
-	host, owner, name, err := parseRepo(arg)
+	host, owner, name, rn, err := parseRepo(arg)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -133,6 +133,18 @@ func parseRepository() {
 		brs <- b
 	}()
 
+	// get branch stats
+	sts := make(chan map[string]*trackStat)
+	go func() {
+		b := <-brs
+		go func() { brs <- b }()
+		if s, err := getBranchTrackStats(arg, rn, b); err != nil {
+			sts <- map[string]*trackStat{}
+		} else {
+			sts <- s
+		}
+	}()
+
 	// fetch commit history
 	repo := make(chan vcs.Repo)
 	go func() {
@@ -152,7 +164,7 @@ func parseRepository() {
 
 	printIssues(<-is)
 	printPullRequests(<-prs)
-	printBranches(<-brs)
+	printBranches(<-brs, <-sts)
 	printCommits(<-repo)
 }
 

@@ -11,22 +11,32 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
-func printBranch(branch vcs.Branch, maxWidth int) {
+func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue)).Width(maxWidth)
+	statStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorGreen)).Width(4).Align(lipgloss.Right)
 	authorStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue))
 	timeStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80 - maxWidth)
+		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(71 - maxWidth)
 
 	var s string
 	s += numberStyle.Render(branch.Name)
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(80-maxWidth), "…"))
+	if stat != nil {
+		s += statStyle.Render(stat.AheadString())
+		s += statStyle.Render(stat.BehindString())
+	} else {
+		s += statStyle.Render(" ")
+		s += statStyle.Render(" ")
+	}
+	s += genericStyle.Render(" ")
+	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(71-maxWidth), "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")
@@ -35,7 +45,7 @@ func printBranch(branch vcs.Branch, maxWidth int) {
 	fmt.Println(s)
 }
 
-func printBranches(branches []vcs.Branch) {
+func printBranches(branches []vcs.Branch, stats map[string]*trackStat) {
 	headerStyle := lipgloss.NewStyle().
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
@@ -75,7 +85,11 @@ func printBranches(branches []vcs.Branch) {
 	}
 
 	for _, v := range branches {
-		printBranch(v, maxWidth)
+		stat, ok := stats[v.Name]
+		if !ok {
+			stat = nil
+		}
+		printBranch(v, stat, maxWidth)
 	}
 	// if trimmed {
 	// 	fmt.Println("...")

@@ -98,15 +98,16 @@ func guessClient(host string) (Client, error) {
 	return nil, fmt.Errorf("not a recognized git provider")
 }
 
-func originURL(path string) (string, error) {
+// remoteURL returns remote name and URL
+func remoteURL(path string) (string, string, error) {
 	r, err := git.PlainOpen(path)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	remotes, err := r.Remotes()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	var u string
@@ -120,10 +121,11 @@ func originURL(path string) (string, error) {
 	}
 
 	if u == "" {
-		return "", fmt.Errorf("no remote found")
+		return "", "", fmt.Errorf("no remote found")
 	}
 
-	return cleanupURL(u)
+	u, err = cleanupURL(u)
+	return rn, u, err
 }
 
 func cleanupURL(arg string) (string, error) {
@@ -166,22 +168,22 @@ func cleanupURL(arg string) (string, error) {
 	return u.String(), nil
 }
 
-// parseRepo returns host, owner and repository name from a given path or URL.
-func parseRepo(arg string) (string, string, string, error) {
-	u, err := originURL(arg)
+// parseRepo returns host, owner, repository name and remote name from a given path or URL.
+func parseRepo(arg string) (string, string, string, string, error) {
+	rn, u, err := remoteURL(arg)
 	if err != nil {
 		// not a local repo
 		u, err = cleanupURL(arg)
 		if err != nil {
-			return "", "", "", err
+			return "", "", "", "", err
 		}
 	}
 
 	p := strings.Split(u, "/")
 	if len(p) < 5 {
-		return "", "", "", fmt.Errorf("does not look like a valid path or URL")
+		return "", "", "", "", fmt.Errorf("does not look like a valid path or URL")
 	}
 
 	host, owner, name := p[2], p[3], strings.Join(p[4:], "/")
-	return host, owner, name, nil
+	return host, owner, name, rn, nil
 }
