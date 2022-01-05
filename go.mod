@@ -8,7 +8,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/kevinburke/ssh_config v1.1.0
-	github.com/muesli/gamut v0.2.1-0.20210907032934-daa621f1be71
+	github.com/muesli/gamut v0.3.0
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.11.0
 	github.com/shurcooL/githubv4 v0.0.0-20211117020012-5800b9de5b8b
