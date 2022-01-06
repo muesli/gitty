@@ -26,6 +26,8 @@ func (s *trackStat) Render() string {
 		Foreground(lipgloss.Color(theme.colorRed))
 	statCountStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(4).Align(lipgloss.Right)
+	statCountWarnStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorYellow)).Width(4).Align(lipgloss.Right)
 	if s == nil {
 		return genericStyle.Render(" ") + statCountStyle.Render(" ") + statCountStyle.Render(" ")
 	} else {
@@ -35,14 +37,21 @@ func (s *trackStat) Render() string {
 		} else {
 			str += genericStyle.Render(" ")
 		}
-		str += statCountStyle.Render(s.AheadString())
-		str += statCountStyle.Render(s.BehindString())
+		if s.Ahead > 0 || s.Behind > 0 {
+			str += statCountWarnStyle.Render(s.AheadString())
+			str += statCountWarnStyle.Render(s.BehindString())
+		} else {
+			str += statCountStyle.Render(s.AheadString())
+			str += statCountStyle.Render(s.BehindString())
+		}
 		return str
 	}
 }
 
 func (s trackStat) AheadString() string {
-	if s.Ahead > maxTrackStatCount {
+	if s.Ahead == 0 {
+		return "↑"
+	} else if s.Ahead > maxTrackStatCount {
 		return fmt.Sprintf("%d+↑", maxTrackStatCount)
 	} else {
 		return fmt.Sprintf("%d↑", s.Ahead)
@@ -50,7 +59,9 @@ func (s trackStat) AheadString() string {
 }
 
 func (s trackStat) BehindString() string {
-	if s.Behind > maxTrackStatCount {
+	if s.Behind == 0 {
+		return "↓"
+	} else if s.Behind > maxTrackStatCount {
 		return fmt.Sprintf("%d+↓", maxTrackStatCount)
 	} else {
 		return fmt.Sprintf("%d↓", s.Behind)

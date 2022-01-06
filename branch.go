@@ -21,14 +21,14 @@ func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 	timeStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(71 - maxWidth)
+		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(70 - maxWidth)
 
 	var s string
 	s += numberStyle.Render(branch.Name)
 	s += genericStyle.Render(" ")
 	s += stat.Render()
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(71-maxWidth), "…"))
+	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(70-maxWidth), "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")
