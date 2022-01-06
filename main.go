@@ -130,14 +130,15 @@ func parseRepository() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		brs <- b
+		brs <- filterBranches(b)
 	}()
 
 	// get branch stats
 	sts := make(chan map[string]*trackStat)
+	stbrs := make(chan []vcs.Branch)
 	go func() {
 		b := <-brs
-		go func() { brs <- b }()
+		go func() { stbrs <- b }()
 		if s, err := getBranchTrackStats(arg, rn, b); err != nil {
 			sts <- map[string]*trackStat{}
 		} else {
@@ -164,7 +165,7 @@ func parseRepository() {
 
 	printIssues(<-is)
 	printPullRequests(<-prs)
-	printBranches(<-brs, <-sts)
+	printBranches(<-stbrs, <-sts)
 	printCommits(<-repo)
 }
 

@@ -42,24 +42,6 @@ func printBranches(branches []vcs.Branch, stats map[string]*trackStat) {
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
 
-	sort.Slice(branches, func(i, j int) bool {
-		if branches[i].LastCommit.CommittedAt.Equal(branches[j].LastCommit.CommittedAt) {
-			return strings.Compare(branches[i].Name, branches[j].Name) < 0
-		}
-		return branches[i].LastCommit.CommittedAt.After(branches[j].LastCommit.CommittedAt)
-	})
-
-	// filter list
-	var b []vcs.Branch //nolint
-	for _, v := range branches {
-		if *maxBranchAge > 0 &&
-			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
-			continue
-		}
-		b = append(b, v)
-	}
-	branches = b
-
 	// trimmed := false
 	if *maxBranches > 0 && len(branches) > *maxBranches {
 		branches = branches[:*maxBranches]
@@ -86,4 +68,25 @@ func printBranches(branches []vcs.Branch, stats map[string]*trackStat) {
 	// if trimmed {
 	// 	fmt.Println("...")
 	// }
+}
+
+func filterBranches(branches []vcs.Branch) []vcs.Branch {
+	sort.Slice(branches, func(i, j int) bool {
+		if branches[i].LastCommit.CommittedAt.Equal(branches[j].LastCommit.CommittedAt) {
+			return strings.Compare(branches[i].Name, branches[j].Name) < 0
+		}
+		return branches[i].LastCommit.CommittedAt.After(branches[j].LastCommit.CommittedAt)
+	})
+
+	// filter list
+	var b []vcs.Branch //nolint
+	for _, v := range branches {
+		if *maxBranchAge > 0 &&
+			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
+			continue
+		}
+		b = append(b, v)
+	}
+	branches = b
+	return branches
 }
