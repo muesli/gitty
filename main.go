@@ -138,10 +138,11 @@ func parseRepository() {
 	stbrs := make(chan []vcs.Branch)
 	go func() {
 		b := <-brs
-		go func() { stbrs <- b }()
 		if s, err := getBranchTrackStats(arg, rn, b); err != nil {
+			stbrs <- b
 			sts <- map[string]*trackStat{}
 		} else {
+			stbrs <- b
 			sts <- s
 		}
 	}()
