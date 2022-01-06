@@ -16,8 +16,6 @@ func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue)).Width(maxWidth)
-	statStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorGreen)).Width(4).Align(lipgloss.Right)
 	authorStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorBlue))
 	timeStyle := lipgloss.NewStyle().
@@ -28,13 +26,7 @@ func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 	var s string
 	s += numberStyle.Render(branch.Name)
 	s += genericStyle.Render(" ")
-	if stat != nil {
-		s += statStyle.Render(stat.AheadString())
-		s += statStyle.Render(stat.BehindString())
-	} else {
-		s += statStyle.Render(" ")
-		s += statStyle.Render(" ")
-	}
+	s += stat.Render()
 	s += genericStyle.Render(" ")
 	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(71-maxWidth), "…"))
 	s += genericStyle.Render(" ")
