@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/revlist"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/muesli/gitty/vcs"
 )
 
@@ -106,23 +107,6 @@ func getBranchTrackStats(path string, remote string, trackedRemoteBranches []vcs
 	return results, nil
 }
 
-func getAhead(repo *git.Repository, ref plumbing.Hash, base plumbing.Hash) (int, error) {
-	hashes, err := revlist.Objects(repo.Storer,
-		[]plumbing.Hash{ref},
-		[]plumbing.Hash{base},
-	)
-	if err != nil {
-		return 0, err
-	}
-	counter := 0
-	for _, hash := range hashes {
-		if c, err := repo.CommitObject(hash); err == nil && c != nil {
-			counter++
-		}
-	}
-	return counter, nil
-}
-
 func getTrackStat(repo *git.Repository, rawLocalBranch *config.Branch, remoteBranch *vcs.Branch) (*trackStat, error) {
 	if localBranch, err := repo.Branch(rawLocalBranch.Name); err != nil {
 		return nil, err
@@ -142,7 +126,7 @@ func getTrackStat(repo *git.Repository, rawLocalBranch *config.Branch, remoteBra
 		}
 
 		if stat.Ahead, stat.Behind, err = calculateTrackCount(
-			repo, [2]plumbing.Hash{remoteRef.Hash(), localRef.Hash()},
+			repo, remoteRef.Hash(), localRef.Hash(),
 		); err != nil {
 			return nil, err
 		}
@@ -155,10 +139,57 @@ func getTrackStat(repo *git.Repository, rawLocalBranch *config.Branch, remoteBra
 	}
 }
 
-func calculateTrackCount(repo *git.Repository, hashes [2]plumbing.Hash) (ahead, behind int, err error) {
-	if ahead, err = getAhead(repo, hashes[0], hashes[1]); err != nil {
-		return
+func calculateTrackCount(repo *git.Repository, ref, base plumbing.Hash) (ahead, behind int, err error) {
+	if ref == base {
+		return 0, 0, nil
 	}
-	behind, err = getAhead(repo, hashes[1], hashes[0])
+
+	left, err := repo.CommitObject(ref)
+	if err != nil {
+		return 0, 0, err
+	}
+	right, err := repo.CommitObject(base)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	commitMap := make(map[plumbing.Hash]bool)
+
+	if err := iterateCommits(left, func(c *object.Commit) {
+		commitMap[c.Hash] = true
+	}); err != nil {
+		return 0, 0, err
+	}
+
+	if err := iterateCommits(right, func(c *object.Commit) {
+		if _, ok := commitMap[c.Hash]; !ok {
+			behind++
+		} else {
+			commitMap[c.Hash] = false
+		}
+	}); err != nil {
+		return 0, 0, err
+	}
+
+	for _, v := range commitMap {
+		if v {
+			ahead++
+		}
+	}
 	return
+}
+
+func iterateCommits(c *object.Commit, fn func(c *object.Commit)) error {
+	iter := object.NewCommitPreorderIter(c, map[plumbing.Hash]bool{}, []plumbing.Hash{})
+	defer iter.Close()
+	for {
+		if curr, err := iter.Next(); err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		} else {
+			fn(curr)
+		}
+	}
+	return nil
 }
