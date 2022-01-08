@@ -11,10 +11,12 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Client is a GitHub client.
 type Client struct {
 	api *githubv4.Client
 }
 
+// NewClient creates a new GitHub client.
 func NewClient(token string) (*Client, error) {
 	var httpClient *http.Client
 	ts := oauth2.StaticTokenSource(
@@ -44,6 +46,7 @@ func (c *Client) queryWithRetry(ctx context.Context, q interface{}, variables ma
 	return nil
 }
 
+// IssueURL returns the URL to the issue with the given number.
 func (c *Client) IssueURL(owner string, name string, number int) string {
 	return fmt.Sprintf("https://github.com/%s/%s/issues/%d", owner, name, number)
 }

@@ -18,7 +18,7 @@ var historyQuery struct {
 					Edges      []struct {
 						Cursor githubv4.String
 						Node   struct {
-							QLCommit
+							qlCommit
 						}
 					}
 				} `graphql:"history(first: 100, since: $since)"`
@@ -27,7 +27,7 @@ var historyQuery struct {
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
-type QLCommit struct {
+type qlCommit struct {
 	OID             githubv4.GitObjectID
 	MessageHeadline githubv4.String
 	CommittedDate   githubv4.GitTimestamp
@@ -38,6 +38,7 @@ type QLCommit struct {
 	}
 }
 
+// History returns a list of commits for the given repository.
 func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit, error) {
 	var commits []vcs.Commit //nolint
 
@@ -53,17 +54,17 @@ func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit,
 	}
 
 	for _, v := range historyQuery.Repository.Object.Commit.History.Edges {
-		if v.Node.QLCommit.OID == "" {
+		if v.Node.qlCommit.OID == "" {
 			// fmt.Println("Commit ID broken:", v.Node.QLCommit.OID)
 			continue
 		}
-		commits = append(commits, CommitFromQL(v.Node.QLCommit))
+		commits = append(commits, commitFromQL(v.Node.qlCommit))
 	}
 
 	return commits, nil
 }
 
-func CommitFromQL(commit QLCommit) vcs.Commit {
+func commitFromQL(commit qlCommit) vcs.Commit {
 	return vcs.Commit{
 		ID:              string(commit.OID),
 		MessageHeadline: string(commit.MessageHeadline),

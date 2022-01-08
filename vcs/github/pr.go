@@ -14,14 +14,14 @@ var pullRequestQuery struct {
 			Edges      []struct {
 				Cursor githubv4.String
 				Node   struct {
-					QLPullRequest
+					qlPullRequest
 				}
 			}
 		} `graphql:"pullRequests(first: 100, after: $after, states: OPEN, orderBy: {field: CREATED_AT, direction: DESC})"`
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
-type QLPullRequest struct {
+type qlPullRequest struct {
 	Number    githubv4.Int
 	Body      githubv4.String
 	Title     githubv4.String
@@ -37,6 +37,7 @@ type QLPullRequest struct {
 	} `graphql:"labels(first: 100, orderBy: {field: NAME, direction: ASC})"`
 }
 
+// PullRequests returns a list of pull requests for the given repository.
 func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, error) {
 	var pullRequests []vcs.PullRequest
 
@@ -55,7 +56,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 		}
 
 		for _, v := range pullRequestQuery.Repository.PullRequests.Edges {
-			pullRequests = append(pullRequests, PullRequestFromQL(v.Node.QLPullRequest))
+			pullRequests = append(pullRequests, pullRequestFromQL(v.Node.qlPullRequest))
 
 			variables["after"] = githubv4.NewString(v.Cursor)
 		}
@@ -64,7 +65,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 	return pullRequests, nil
 }
 
-func PullRequestFromQL(pr QLPullRequest) vcs.PullRequest {
+func pullRequestFromQL(pr qlPullRequest) vcs.PullRequest {
 	p := vcs.PullRequest{
 		ID:        int(pr.Number),
 		Body:      string(pr.Body),

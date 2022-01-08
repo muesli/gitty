@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Issue represents an issue.
 type Issue struct {
 	ID        int
 	Body      string
