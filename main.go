@@ -15,7 +15,9 @@ import (
 )
 
 var (
-	Version   = ""
+	// Version is the version of gitty
+	Version = ""
+	// CommitSHA is the git commit SHA of gitty
 	CommitSHA = ""
 
 	maxBranches     = flag.Int("max-branches", 10, "Max amount of active branches to show")
@@ -60,7 +62,7 @@ func parseRepository() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		args = args[1:]
+		args = args[1:] //nolint
 	}
 
 	// parse URL from args

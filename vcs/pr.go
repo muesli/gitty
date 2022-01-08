@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// PullRequest represents a pull request.
 type PullRequest struct {
 	ID        int
 	Body      string

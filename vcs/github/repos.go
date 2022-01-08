@@ -15,7 +15,7 @@ var reposQuery struct {
 			Edges      []struct {
 				Cursor githubv4.String
 				Node   struct {
-					QLRepository
+					qlRepository
 				}
 			}
 		} `graphql:"repositories(first: 100, after:$after isFork: false, ownerAffiliations: OWNER, orderBy: {field: CREATED_AT, direction: DESC})"`
@@ -23,10 +23,10 @@ var reposQuery struct {
 }
 
 var repoQuery struct {
-	Repository QLRepository `graphql:"repository(owner: $owner, name: $name)"`
+	Repository qlRepository `graphql:"repository(owner: $owner, name: $name)"`
 }
 
-type QLRepository struct {
+type qlRepository struct {
 	Owner struct {
 		Login githubv4.String
 	}
@@ -50,9 +50,10 @@ type QLRepository struct {
 		} `graphql:"... on Commit"`
 	} `graphql:"object(expression: \"HEAD\")"`
 
-	Releases QLRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
+	Releases qlRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
 }
 
+// Repository returns the repository with the given name.
 func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 	variables := map[string]interface{}{
 		"owner": githubv4.String(owner),
@@ -63,14 +64,15 @@ func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 		return vcs.Repo{}, err
 	}
 
-	repo := RepoFromQL(repoQuery.Repository)
+	repo := repoFromQL(repoQuery.Repository)
 	if len(repoQuery.Repository.Releases.Nodes) > 0 {
-		repo.LastRelease = ReleaseFromQL(repoQuery.Repository.Releases)
+		repo.LastRelease = releaseFromQL(repoQuery.Repository.Releases)
 	}
 
 	return repo, nil
 }
 
+// Repositories returns a list of repositories for the given user.
 func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 	var repos []vcs.Repo
 
@@ -88,9 +90,9 @@ func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 		}
 
 		for _, v := range reposQuery.User.Repositories.Edges {
-			repo := RepoFromQL(v.Node.QLRepository)
+			repo := repoFromQL(v.Node.qlRepository)
 			if len(v.Node.Releases.Nodes) > 0 {
-				repo.LastRelease = ReleaseFromQL(v.Node.Releases)
+				repo.LastRelease = releaseFromQL(v.Node.Releases)
 			}
 
 			repos = append(repos, repo)
@@ -102,7 +104,7 @@ func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 	return repos, nil
 }
 
-func RepoFromQL(repo QLRepository) vcs.Repo {
+func repoFromQL(repo qlRepository) vcs.Repo {
 	return vcs.Repo{
 		Owner:         string(repo.Owner.Login),
 		Name:          string(repo.Name),

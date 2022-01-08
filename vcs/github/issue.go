@@ -14,14 +14,14 @@ var issuesQuery struct {
 			Edges      []struct {
 				Cursor githubv4.String
 				Node   struct {
-					QLIssue
+					qlIssue
 				}
 			}
 		} `graphql:"issues(first: 100, after: $after, states: OPEN, orderBy: {field: CREATED_AT, direction: DESC})"`
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
-type QLIssue struct {
+type qlIssue struct {
 	Number    githubv4.Int
 	Body      githubv4.String
 	Title     githubv4.String
@@ -37,6 +37,7 @@ type QLIssue struct {
 	} `graphql:"labels(first: 100, orderBy: {field: NAME, direction: ASC})"`
 }
 
+// Issues returns a list of issues for the given repository.
 func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 	var issues []vcs.Issue
 
@@ -55,7 +56,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 		}
 
 		for _, v := range issuesQuery.Repository.Issues.Edges {
-			issues = append(issues, IssueFromQL(v.Node.QLIssue))
+			issues = append(issues, issueFromQL(v.Node.qlIssue))
 
 			variables["after"] = githubv4.NewString(v.Cursor)
 		}
@@ -64,7 +65,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 	return issues, nil
 }
 
-func IssueFromQL(issue QLIssue) vcs.Issue {
+func issueFromQL(issue qlIssue) vcs.Issue {
 	i := vcs.Issue{
 		ID:        int(issue.Number),
 		Body:      string(issue.Body),

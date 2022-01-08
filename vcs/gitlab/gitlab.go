@@ -12,6 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+// Client is a client for GitLab.
 type Client struct {
 	api         *gitlab.Client
 	host        string
@@ -19,6 +20,7 @@ type Client struct {
 	labelColors map[string]string
 }
 
+// NewClient returns a new GitLab client.
 func NewClient(baseURL, token string, preverified bool) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -47,6 +49,7 @@ func NewClient(baseURL, token string, preverified bool) (*Client, error) {
 	}, nil
 }
 
+// GetUsername returns the username of the authenticated user.
 func (c *Client) GetUsername() (string, error) {
 	u, _, err := c.api.Users.CurrentUser()
 	if err != nil {
@@ -56,6 +59,7 @@ func (c *Client) GetUsername() (string, error) {
 	return u.Username, nil
 }
 
+// Issues returns a list of issues for the given repository.
 func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 	var i []vcs.Issue
 
@@ -97,6 +101,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 	return i, nil
 }
 
+// PullRequests returns a list of pull requests for the given repository.
 func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, error) {
 	var i []vcs.PullRequest
 
@@ -138,6 +143,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 	return i, nil
 }
 
+// Repository returns the repository with the given name.
 func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 	p, _, err := c.api.Projects.GetProject(owner+"/"+name, nil)
 	if err != nil {
@@ -148,6 +154,7 @@ func (c *Client) Repository(owner string, name string) (vcs.Repo, error) {
 	return r, nil
 }
 
+// Repositories returns a list of repositories for the given user.
 func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 	var repos []vcs.Repo
 
@@ -195,9 +202,10 @@ func (c *Client) Repositories(owner string) ([]vcs.Repo, error) {
 		}
 	}
 
-	return repos, nil
+	return repos, nil //nolint
 }
 
+// Branches returns a list of branches for the given repository.
 func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 	var i []vcs.Branch
 	opts := &gitlab.ListBranchesOptions{
@@ -232,6 +240,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 	return i, nil
 }
 
+// History returns a list of commits for the given repository.
 func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit, error) {
 	var commits []vcs.Commit
 
@@ -272,6 +281,7 @@ func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit,
 	return commits, nil
 }
 
+// IssueURL returns the URL to the issue with the given number.
 func (c *Client) IssueURL(owner string, name string, number int) string {
 	i, _, err := c.api.Issues.GetIssue(owner+"/"+name, number)
 	if err == nil {

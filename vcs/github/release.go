@@ -5,6 +5,7 @@ import (
 	"github.com/shurcooL/githubv4"
 )
 
+/*
 var recentReleasesQuery struct {
 	User struct {
 		Login                     githubv4.String
@@ -13,15 +14,16 @@ var recentReleasesQuery struct {
 			Edges      []struct {
 				Cursor githubv4.String
 				Node   struct {
-					QLRepository
-					Releases QLRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
+					qlRepository
+					Releases qlRelease `graphql:"releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC})"`
 				}
 			}
 		} `graphql:"repositoriesContributedTo(first: 100, after:$after includeUserRepositories: true, contributionTypes: COMMIT)"`
 	} `graphql:"user(login:$username)"`
 }
+*/
 
-type QLRelease struct {
+type qlRelease struct {
 	Nodes []struct {
 		Name         githubv4.String
 		TagName      githubv4.String
@@ -32,7 +34,7 @@ type QLRelease struct {
 	}
 }
 
-func ReleaseFromQL(release QLRelease) vcs.Release {
+func releaseFromQL(release qlRelease) vcs.Release {
 	return vcs.Release{
 		Name:        string(release.Nodes[0].Name),
 		TagName:     string(release.Nodes[0].TagName),

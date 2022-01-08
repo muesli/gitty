@@ -3,16 +3,17 @@ package github
 import (
 	"context"
 
-	"github.com/muesli/gitty/vcs"
 	"github.com/shurcooL/githubv4"
 )
 
-type QLUser struct {
+/*
+type qlUser struct {
 	Login     githubv4.String
 	Name      githubv4.String
 	AvatarURL githubv4.String
 	URL       githubv4.String
 }
+*/
 
 var viewerQuery struct {
 	Viewer struct {
@@ -20,6 +21,7 @@ var viewerQuery struct {
 	}
 }
 
+// GetUsername returns the username of the authenticated user.
 func (c *Client) GetUsername() (string, error) {
 	if err := c.queryWithRetry(context.Background(), &viewerQuery, nil); err != nil {
 		return "", err
@@ -28,7 +30,8 @@ func (c *Client) GetUsername() (string, error) {
 	return string(viewerQuery.Viewer.Login), nil
 }
 
-func UserFromQL(user QLUser) vcs.User {
+/*
+func userFromQL(user qlUser) vcs.User {
 	return vcs.User{
 		Login:     string(user.Login),
 		Name:      string(user.Name),
@@ -36,3 +39,4 @@ func UserFromQL(user QLUser) vcs.User {
 		URL:       string(user.URL),
 	}
 }
+*/

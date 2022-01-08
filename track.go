@@ -30,24 +30,26 @@ func (s *trackStat) Render() string {
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(4).Align(lipgloss.Right)
 	statCountWarnStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorYellow)).Width(4).Align(lipgloss.Right)
+
 	if s == nil {
 		return remoteStyle.Render("☁") + statCountStyle.Render(" ") + statCountStyle.Render(" ")
-	} else {
-		str := ""
-		if s.Outdated {
-			str += outdatedStyle.Render("↻")
-		} else {
-			str += genericStyle.Render(" ")
-		}
-		if s.Ahead > 0 || s.Behind > 0 {
-			str += statCountWarnStyle.Render(s.AheadString())
-			str += statCountWarnStyle.Render(s.BehindString())
-		} else {
-			str += statCountStyle.Render(s.AheadString())
-			str += statCountStyle.Render(s.BehindString())
-		}
-		return str
 	}
+
+	var str string
+	if s.Outdated {
+		str += outdatedStyle.Render("↻")
+	} else {
+		str += genericStyle.Render(" ")
+	}
+	if s.Ahead > 0 || s.Behind > 0 {
+		str += statCountWarnStyle.Render(s.AheadString())
+		str += statCountWarnStyle.Render(s.BehindString())
+	} else {
+		str += statCountStyle.Render(s.AheadString())
+		str += statCountStyle.Render(s.BehindString())
+	}
+
+	return str
 }
 
 func (s trackStat) AheadString() string {
@@ -102,10 +104,10 @@ func getBranchTrackStats(path string, remote string, remoteBranches []vcs.Branch
 
 	results := make(map[string]*trackStat, len(remoteBranches))
 	for _, remoteBranch := range remoteBranches {
-		var result *trackStat = nil
+		var result *trackStat
 		if b, ok := trackedBranchMap[remoteBranch.Name]; !ok {
 		} else {
-			if result, err = getTrackStat(repo, b, remote, &remoteBranch); err != nil {
+			if result, err = getTrackStat(repo, b, remote, remoteBranch); err != nil {
 				result = nil
 			}
 		}
@@ -114,30 +116,31 @@ func getBranchTrackStats(path string, remote string, remoteBranches []vcs.Branch
 	return results, nil
 }
 
-func getTrackStat(repo *git.Repository, localRef *plumbing.Reference, remote string, remoteBranch *vcs.Branch) (*trackStat, error) {
-	if remoteRef, err := repo.Reference(
+func getTrackStat(repo *git.Repository, localRef *plumbing.Reference, remote string, remoteBranch vcs.Branch) (*trackStat, error) {
+	remoteRef, err := repo.Reference(
 		plumbing.NewRemoteReferenceName(remote, remoteBranch.Name), true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	stat := &trackStat{
+		Outdated: false,
+		Ahead:    0,
+		Behind:   0,
+	}
+
+	if stat.Ahead, stat.Behind, err = calculateTrackCount(
+		repo, localRef.Hash(), remoteRef.Hash(),
 	); err != nil {
 		return nil, err
-	} else {
-		stat := &trackStat{
-			Outdated: false,
-			Ahead:    0,
-			Behind:   0,
-		}
-
-		if stat.Ahead, stat.Behind, err = calculateTrackCount(
-			repo, localRef.Hash(), remoteRef.Hash(),
-		); err != nil {
-			return nil, err
-		}
-
-		if remoteRef.Hash().String() != remoteBranch.LastCommit.ID {
-			// mark outdated, need `git fetch`
-			stat.Outdated = true
-		}
-		return stat, nil
 	}
+
+	if remoteRef.Hash().String() != remoteBranch.LastCommit.ID {
+		// mark outdated, need `git fetch`
+		stat.Outdated = true
+	}
+	return stat, nil
 }
 
 func calculateTrackCount(repo *git.Repository, ref, base plumbing.Hash) (ahead, behind int, err error) {

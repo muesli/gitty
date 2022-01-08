@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Release represents a release.
 type Release struct {
 	Name         string
 	TagName      string

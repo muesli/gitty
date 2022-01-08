@@ -1,5 +1,6 @@
 package vcs
 
+// Repo represents a repository.
 type Repo struct {
 	Owner         string
 	Name          string
@@ -13,6 +14,7 @@ type Repo struct {
 	LastRelease   Release
 }
 
+// ReposWithRelease returns all the repos that have a release.
 func ReposWithRelease(repos []Repo) []Repo {
 	var r []Repo //nolint
 

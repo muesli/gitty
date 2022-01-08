@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Commit represents a git commit.
 type Commit struct {
 	ID              string
 	MessageHeadline string

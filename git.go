@@ -16,6 +16,7 @@ import (
 	"github.com/muesli/gitty/vcs/gitlab"
 )
 
+// Client defines the set of methods required from a git provider.
 type Client interface {
 	Issues(owner string, name string) ([]vcs.Issue, error)
 	PullRequests(owner string, name string) ([]vcs.PullRequest, error)

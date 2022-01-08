@@ -4,6 +4,7 @@ import (
 	"github.com/muesli/termenv"
 )
 
+// Theme defines the colors used by gitty.
 type Theme struct {
 	colorBlack    string
 	colorRed      string
