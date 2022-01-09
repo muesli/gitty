@@ -118,3 +118,10 @@ retrieve the projects of other namespaces:
 ```bash
 $ gitty --all-projects --namespace muesli github.com
 ```
+
+## Feedback
+
+Got some feedback or suggestions? Please open an issue or drop me a note!
+
+* [Twitter](https://twitter.com/mueslix)
+* [The Fediverse](https://mastodon.social/@fribbledom)
