@@ -11,6 +11,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/kevinburke/ssh_config"
 	"github.com/muesli/gitty/vcs"
+	"github.com/muesli/gitty/vcs/bitbucketcloud"
 	"github.com/muesli/gitty/vcs/gitea"
 	"github.com/muesli/gitty/vcs/github"
 	"github.com/muesli/gitty/vcs/gitlab"
@@ -81,6 +82,9 @@ func guessClient(host string) (Client, error) {
 	}
 	if strings.Contains(host, "invent.kde.org") {
 		return gitlab.NewClient(host, token, true)
+	}
+	if strings.Contains(host, "bitbucket.org") {
+		return bitbucketcloud.NewClient(token)
 	}
 
 	var client Client
