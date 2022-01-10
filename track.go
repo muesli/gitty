@@ -126,7 +126,7 @@ func getTrackStat(repo *git.Repository, rawLocalBranch *config.Branch, remoteBra
 		}
 
 		if stat.Ahead, stat.Behind, err = calculateTrackCount(
-			repo, remoteRef.Hash(), localRef.Hash(),
+			repo, localRef.Hash(), remoteRef.Hash(),
 		); err != nil {
 			return nil, err
 		}
