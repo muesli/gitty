@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/muesli/gitty/vcs"
@@ -69,7 +68,7 @@ func (s trackStat) BehindString() string {
 	}
 }
 
-func getBranchTrackStats(path string, remote string, trackedRemoteBranches []vcs.Branch) (map[string]*trackStat, error) {
+func getBranchTrackStats(path string, remote string, remoteBranches []vcs.Branch) (map[string]*trackStat, error) {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
 		return nil, err
@@ -80,25 +79,31 @@ func getBranchTrackStats(path string, remote string, trackedRemoteBranches []vcs
 		return nil, err
 	}
 
-	trackedBranchMap := make(map[string]*config.Branch)
+	remoteBranchMap := make(map[string]struct{}, len(remoteBranches))
+	for _, remoteBranch := range remoteBranches {
+		remoteBranchMap[remoteBranch.Name] = struct{}{}
+	}
+	trackedBranchMap := make(map[string]*plumbing.Reference)
 
 	if err := iter.ForEach(func(branchRef *plumbing.Reference) error {
-		if b, err := repo.Branch(branchRef.Name().Short()); err == nil {
-			if b.Remote == remote {
-				trackedBranchMap[b.Merge.Short()] = b
-			}
+		localName := branchRef.Name().Short()
+		// repo.Branch reads branch from .git/config, it will report "not found" if a local branch has no config.
+		if b, err := repo.Branch(localName); err == nil && b.Remote == remote {
+			trackedBranchMap[b.Merge.Short()] = branchRef
+		} else if _, ok := remoteBranchMap[localName]; ok {
+			trackedBranchMap[localName] = branchRef
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	results := make(map[string]*trackStat, len(trackedRemoteBranches))
-	for _, remoteBranch := range trackedRemoteBranches {
+	results := make(map[string]*trackStat, len(remoteBranches))
+	for _, remoteBranch := range remoteBranches {
 		var result *trackStat = nil
 		if b, ok := trackedBranchMap[remoteBranch.Name]; !ok {
 		} else {
-			if result, err = getTrackStat(repo, b, &remoteBranch); err != nil {
+			if result, err = getTrackStat(repo, b, remote, &remoteBranch); err != nil {
 				result = nil
 			}
 		}
@@ -107,15 +112,9 @@ func getBranchTrackStats(path string, remote string, trackedRemoteBranches []vcs
 	return results, nil
 }
 
-func getTrackStat(repo *git.Repository, rawLocalBranch *config.Branch, remoteBranch *vcs.Branch) (*trackStat, error) {
-	if localBranch, err := repo.Branch(rawLocalBranch.Name); err != nil {
-		return nil, err
-	} else if localRef, err := repo.Reference(
-		plumbing.NewBranchReferenceName(localBranch.Name), true,
-	); err != nil {
-		return nil, err
-	} else if remoteRef, err := repo.Reference(
-		plumbing.NewRemoteReferenceName(localBranch.Remote, remoteBranch.Name), true,
+func getTrackStat(repo *git.Repository, localRef *plumbing.Reference, remote string, remoteBranch *vcs.Branch) (*trackStat, error) {
+	if remoteRef, err := repo.Reference(
+		plumbing.NewRemoteReferenceName(remote, remoteBranch.Name), true,
 	); err != nil {
 		return nil, err
 	} else {
