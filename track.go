@@ -24,12 +24,14 @@ func (s *trackStat) Render() string {
 		Foreground(lipgloss.Color(theme.colorGray))
 	outdatedStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorRed))
+	remoteStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(theme.colorCyan))
 	statCountStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(4).Align(lipgloss.Right)
 	statCountWarnStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorYellow)).Width(4).Align(lipgloss.Right)
 	if s == nil {
-		return genericStyle.Render(" ") + statCountStyle.Render(" ") + statCountStyle.Render(" ")
+		return remoteStyle.Render("☁") + statCountStyle.Render(" ") + statCountStyle.Render(" ")
 	} else {
 		str := ""
 		if s.Outdated {
