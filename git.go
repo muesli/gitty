@@ -16,6 +16,11 @@ import (
 	"github.com/muesli/gitty/vcs/gitlab"
 )
 
+const (
+	originRemote   = "origin"
+	upstreamRemote = "upstream"
+)
+
 // Client defines the set of methods required from a git provider.
 type Client interface {
 	Issues(owner string, name string) ([]vcs.Issue, error)
@@ -114,8 +119,12 @@ func remoteURL(path string) (string, string, error) {
 	var u string
 	var rn string
 	for _, v := range remotes {
-		if (v.Config().Name == "origin" && rn != "origin") ||
+		if (v.Config().Name == upstreamRemote && rn != upstreamRemote) ||
 			rn == "" {
+			rn = v.Config().Name
+			u = v.Config().URLs[0]
+		}
+		if v.Config().Name == originRemote && rn != originRemote && rn != upstreamRemote {
 			rn = v.Config().Name
 			u = v.Config().URLs[0]
 		}
