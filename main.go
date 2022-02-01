@@ -256,7 +256,13 @@ func printVersion() {
 }
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: gitty [PATH|URL] [ISSUE|PR]\n"+
+			"Contextual information about your git projects, right on the command-line.\n\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
+
 	if *version {
 		printVersion()
 		os.Exit(0)
