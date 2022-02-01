@@ -175,6 +175,11 @@ func cleanupURL(arg string) (string, error) {
 	u.User = nil
 	u.Scheme = "https"
 
+	// support SSH connections to GitHub via port 443
+	if u.Host == "ssh.github.com" {
+		u.Host = "github.com"
+	}
+
 	return u.String(), nil
 }
 
