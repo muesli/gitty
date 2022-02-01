@@ -3,7 +3,7 @@ module github.com/muesli/gitty
 go 1.15
 
 require (
-	code.gitea.io/sdk/gitea v0.15.0
+	code.gitea.io/sdk/gitea v0.15.1
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-git/go-git/v5 v5.4.2
