@@ -34,9 +34,7 @@ Compiling gitty is easy, simply run:
     cd gitty
     go build
 
-## Usage
-
-### Access Tokens
+## Access Tokens
 
 Note: In order to access the APIs of hosting providers like GitHub, GitLab, or
 Gitea, `gitty` requires you to provide valid access tokens in an environment
@@ -46,7 +44,7 @@ You can provide tokens for multiple hosts and services in this format:
 
 `github.com=abc123;gitlab.com=xyz890;myhost.tld=...`
 
-#### GitHub
+### GitHub
 
 You can [create a new token](https://github.com/settings/tokens/new?scopes=repo:status,public_repo,read:user,read:org&description=gitty)
 in your profile settings:
@@ -55,7 +53,7 @@ Developer settings > Personal access tokens > Generate new token
 Make sure to enable the `repo:status`, `public_repo`, `read:user`, and
 `read:org` permissions in particular.
 
-#### GitLab
+### GitLab
 
 You can create a new token in your profile settings:
 User Settings > Access Tokens
@@ -63,12 +61,12 @@ User Settings > Access Tokens
 Make sure to enable the `read_user`, `read_api`, and `read_repository`
 permissions.
 
-#### Gitea
+### Gitea
 
 You can create a new token in your profile settings:
 Settings > Applications > Manage Access Tokens
 
-### Basic usage
+## Usage
 
 You can start `gitty` with either a path or a URL as an argument. If no argument
 was provided, `gitty` will operate on the current working directory.
