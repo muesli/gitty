@@ -11,7 +11,7 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
-func printBranch(branch vcs.Branch, maxWidth int) {
+func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 	genericStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGray))
 	numberStyle := lipgloss.NewStyle().
@@ -21,12 +21,14 @@ func printBranch(branch vcs.Branch, maxWidth int) {
 	timeStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(theme.colorGreen)).Width(8).Align(lipgloss.Right)
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80 - maxWidth)
+		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(70 - maxWidth)
 
 	var s string
 	s += numberStyle.Render(branch.Name)
 	s += genericStyle.Render(" ")
-	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(80-maxWidth), "…"))
+	s += stat.Render()
+	s += genericStyle.Render(" ")
+	s += titleStyle.Render(truncate.StringWithTail(branch.LastCommit.MessageHeadline, uint(70-maxWidth), "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")
@@ -35,28 +37,10 @@ func printBranch(branch vcs.Branch, maxWidth int) {
 	fmt.Println(s)
 }
 
-func printBranches(branches []vcs.Branch) {
+func printBranches(branches []vcs.Branch, stats map[string]*trackStat) {
 	headerStyle := lipgloss.NewStyle().
 		PaddingTop(1).
 		Foreground(lipgloss.Color(theme.colorMagenta))
-
-	sort.Slice(branches, func(i, j int) bool {
-		if branches[i].LastCommit.CommittedAt.Equal(branches[j].LastCommit.CommittedAt) {
-			return strings.Compare(branches[i].Name, branches[j].Name) < 0
-		}
-		return branches[i].LastCommit.CommittedAt.After(branches[j].LastCommit.CommittedAt)
-	})
-
-	// filter list
-	var b []vcs.Branch //nolint
-	for _, v := range branches {
-		if *maxBranchAge > 0 &&
-			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
-			continue
-		}
-		b = append(b, v)
-	}
-	branches = b
 
 	// trimmed := false
 	if *maxBranches > 0 && len(branches) > *maxBranches {
@@ -75,9 +59,34 @@ func printBranches(branches []vcs.Branch) {
 	}
 
 	for _, v := range branches {
-		printBranch(v, maxWidth)
+		stat, ok := stats[v.Name]
+		if !ok {
+			stat = nil
+		}
+		printBranch(v, stat, maxWidth)
 	}
 	// if trimmed {
 	// 	fmt.Println("...")
 	// }
+}
+
+func filterBranches(branches []vcs.Branch) []vcs.Branch {
+	sort.Slice(branches, func(i, j int) bool {
+		if branches[i].LastCommit.CommittedAt.Equal(branches[j].LastCommit.CommittedAt) {
+			return strings.Compare(branches[i].Name, branches[j].Name) < 0
+		}
+		return branches[i].LastCommit.CommittedAt.After(branches[j].LastCommit.CommittedAt)
+	})
+
+	// filter list
+	var b []vcs.Branch //nolint
+	for _, v := range branches {
+		if *maxBranchAge > 0 &&
+			v.LastCommit.CommittedAt.Before(time.Now().Add(-24*time.Duration(*maxBranchAge)*time.Hour)) {
+			continue
+		}
+		b = append(b, v)
+	}
+	branches = b
+	return branches
 }
