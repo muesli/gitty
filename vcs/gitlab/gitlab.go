@@ -26,8 +26,9 @@ func NewClient(baseURL, token string, preverified bool) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can't parse URL: %v", err)
 	}
-	u.Path = path.Join(u.Path, "/api/v4")
 	u.Scheme = "https"
+	host := u.String()
+	u.Path = path.Join(u.Path, "/api/v4")
 
 	client, err := gitlab.NewClient(token, gitlab.WithBaseURL(u.String()))
 	if err != nil {
@@ -43,7 +44,7 @@ func NewClient(baseURL, token string, preverified bool) (*Client, error) {
 
 	return &Client{
 		api:         client,
-		host:        baseURL,
+		host:        host,
 		colors:      map[string]int{},
 		labelColors: map[string]string{},
 	}, nil
@@ -82,6 +83,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 				ID:        v.IID,
 				Title:     v.Title,
 				CreatedAt: *v.CreatedAt,
+				URL:       v.WebURL,
 			}
 			for _, l := range v.Labels {
 				issue.Labels = append(issue.Labels, vcs.Label{
@@ -124,6 +126,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 				ID:        v.IID,
 				Title:     v.Title,
 				CreatedAt: *v.CreatedAt,
+				URL:       v.WebURL,
 			}
 			for _, l := range v.Labels {
 				pr.Labels = append(pr.Labels, vcs.Label{
@@ -232,6 +235,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 					CommittedAt:     *v.Commit.CommittedDate,
 					Author:          v.Commit.CommitterName,
 				},
+				URL: v.WebURL,
 			}
 			i = append(i, branch)
 		}
@@ -266,6 +270,7 @@ func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit,
 				MessageHeadline: strings.ReplaceAll(v.Title, "\u00A0", " "),
 				CommittedAt:     *v.CommittedDate,
 				Author:          v.AuthorName,
+				URL:             v.WebURL,
 			})
 		}
 
@@ -304,6 +309,7 @@ func (c *Client) repoFromAPI(p *gitlab.Project) vcs.Repo {
 			Name:        r[0].Name,
 			TagName:     r[0].TagName,
 			PublishedAt: *r[0].CreatedAt,
+			URL:         fmt.Sprintf("%s%s", c.host, r[0].TagPath),
 		}
 	}
 
