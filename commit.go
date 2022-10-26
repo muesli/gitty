@@ -49,16 +49,18 @@ func printCommits(repo vcs.Repo) {
 		Foreground(lipgloss.Color(theme.colorMagenta))
 	// headerDimStyle := lipgloss.NewStyle().
 	// 	Foreground(lipgloss.Color(dimColor))
-	sinceTag := repo.LastRelease.TagName
-	if sinceTag == "" {
-		sinceTag = "creation"
+	sinceTag := "creation"
+	if repo.LastRelease.TagName != "" {
+		sinceTag = repo.LastRelease.TagName
+		if useLinks {
+			sinceTag = termenv.Hyperlink(repo.LastRelease.URL, sinceTag)
+		}
 	}
+	sinceTag = headerStyle.Render(sinceTag)
 
-	fmt.Printf("\n🔥 %s %s\n",
-		headerStyle.Render(fmt.Sprintf("%s %s",
-			pluralize(len(commits), "commit since", "commits since"),
-			sinceTag)),
-
+	fmt.Printf("\n🔥 %s %s %s\n",
+		headerStyle.Render(pluralize(len(commits), "commit since", "commits since")),
+		sinceTag,
 		headerStyle.Render(fmt.Sprintf("(%s)",
 			humanize.Time(repo.LastRelease.PublishedAt))),
 	)
