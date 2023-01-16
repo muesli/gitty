@@ -5,7 +5,7 @@ go 1.15
 require (
 	code.gitea.io/sdk/gitea v0.15.1
 	github.com/charmbracelet/lipgloss v0.6.0
-	github.com/dustin/go-humanize v1.0.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.4.3-0.20220119145113-935af59cf64f
 	github.com/kevinburke/ssh_config v1.2.0
 	github.com/muesli/gamut v0.3.1
