@@ -13,7 +13,7 @@ require (
 	github.com/muesli/termenv v0.15.1
 	github.com/shurcooL/githubv4 v0.0.0-20211117020012-5800b9de5b8b
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
-	github.com/xanzy/go-gitlab v0.83.0
+	github.com/xanzy/go-gitlab v0.84.0
 	golang.org/x/oauth2 v0.7.0
 )
 
