@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
+	"github.com/muesli/termenv"
 )
 
 func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
@@ -24,7 +25,11 @@ func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(70 - maxWidth)
 
 	var s string
-	s += numberStyle.Render(branch.Name)
+	name := numberStyle.Render(branch.Name)
+	if useLinks {
+		name = termenv.Hyperlink(branch.URL, name)
+	}
+	s += name
 	s += genericStyle.Render(" ")
 	s += stat.Render()
 	s += genericStyle.Render(" ")
@@ -32,7 +37,11 @@ func printBranch(branch vcs.Branch, stat *trackStat, maxWidth int) {
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(branch.LastCommit.CommittedAt))
 	s += genericStyle.Render(" ")
-	s += authorStyle.Render(branch.LastCommit.Author)
+	author := authorStyle.Render(branch.LastCommit.Author)
+	if useLinks {
+		author = termenv.Hyperlink(branch.LastCommit.AuthorURL, author)
+	}
+	s += author
 
 	fmt.Println(s)
 }

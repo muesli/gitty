@@ -11,4 +11,5 @@ type Issue struct {
 	Title     string
 	Labels    Labels
 	CreatedAt time.Time
+	URL       string
 }

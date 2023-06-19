@@ -35,6 +35,7 @@ type qlPullRequest struct {
 			}
 		}
 	} `graphql:"labels(first: 100, orderBy: {field: NAME, direction: ASC})"`
+	URL githubv4.String
 }
 
 // PullRequests returns a list of pull requests for the given repository.
@@ -71,6 +72,7 @@ func pullRequestFromQL(pr qlPullRequest) vcs.PullRequest {
 		Body:      string(pr.Body),
 		Title:     string(pr.Title),
 		CreatedAt: pr.CreatedAt.Time,
+		URL:       string(pr.URL),
 	}
 
 	for _, v := range pr.Labels.Edges {

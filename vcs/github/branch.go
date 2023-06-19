@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/muesli/gitty/vcs"
 	"github.com/shurcooL/githubv4"
@@ -36,6 +37,7 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 		branches = append(branches, vcs.Branch{
 			Name:       string(node.Name),
 			LastCommit: commitFromQL(node.Target.Commit),
+			URL:        fmt.Sprintf("https://github.com/%s/%s/tree/%s", owner, name, string(node.Name)),
 		})
 	}
 

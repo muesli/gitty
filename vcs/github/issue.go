@@ -35,6 +35,7 @@ type qlIssue struct {
 			}
 		}
 	} `graphql:"labels(first: 100, orderBy: {field: NAME, direction: ASC})"`
+	URL githubv4.String
 }
 
 // Issues returns a list of issues for the given repository.
@@ -71,6 +72,7 @@ func issueFromQL(issue qlIssue) vcs.Issue {
 		Body:      string(issue.Body),
 		Title:     string(issue.Title),
 		CreatedAt: issue.CreatedAt.Time,
+		URL:       string(issue.URL),
 	}
 
 	for _, v := range issue.Labels.Edges {
