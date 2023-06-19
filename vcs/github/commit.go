@@ -34,8 +34,10 @@ type qlCommit struct {
 	Author          struct {
 		User struct {
 			Login githubv4.String
+			URL   githubv4.String
 		}
 	}
+	URL githubv4.String
 }
 
 // History returns a list of commits for the given repository.
@@ -70,5 +72,7 @@ func commitFromQL(commit qlCommit) vcs.Commit {
 		MessageHeadline: string(commit.MessageHeadline),
 		CommittedAt:     commit.CommittedDate.Time,
 		Author:          string(commit.Author.User.Login),
+		URL:             string(commit.URL),
+		AuthorURL:       string(commit.Author.User.URL),
 	}
 }

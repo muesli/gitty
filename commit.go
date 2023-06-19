@@ -7,6 +7,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
+	"github.com/muesli/termenv"
 )
 
 func printCommit(commit vcs.Commit) {
@@ -20,13 +21,21 @@ func printCommit(commit vcs.Commit) {
 		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80 - 7)
 
 	var s string
-	s += numberStyle.Render(commit.ID[:7])
+	sha := numberStyle.Render(commit.ID[:7])
+	if useLinks {
+		sha = termenv.Hyperlink(commit.URL, sha)
+	}
+	s += sha
 	s += genericStyle.Render(" ")
 	s += titleStyle.Render(truncate.StringWithTail(commit.MessageHeadline, 80-7, "…"))
 	s += genericStyle.Render(" ")
 	s += timeStyle.Render(ago(commit.CommittedAt))
 	s += genericStyle.Render(" ")
-	s += numberStyle.Render(commit.Author)
+	author := numberStyle.Render(commit.Author)
+	if useLinks {
+		author = termenv.Hyperlink(commit.AuthorURL, author)
+	}
+	s += author
 
 	fmt.Println(s)
 }
@@ -40,16 +49,18 @@ func printCommits(repo vcs.Repo) {
 		Foreground(lipgloss.Color(theme.colorMagenta))
 	// headerDimStyle := lipgloss.NewStyle().
 	// 	Foreground(lipgloss.Color(dimColor))
-	sinceTag := repo.LastRelease.TagName
-	if sinceTag == "" {
-		sinceTag = "creation"
+	sinceTag := "creation"
+	if repo.LastRelease.TagName != "" {
+		sinceTag = repo.LastRelease.TagName
+		if useLinks {
+			sinceTag = termenv.Hyperlink(repo.LastRelease.URL, sinceTag)
+		}
 	}
+	sinceTag = headerStyle.Render(sinceTag)
 
-	fmt.Printf("\n🔥 %s %s\n",
-		headerStyle.Render(fmt.Sprintf("%s %s",
-			pluralize(len(commits), "commit since", "commits since"),
-			sinceTag)),
-
+	fmt.Printf("\n🔥 %s %s %s\n",
+		headerStyle.Render(pluralize(len(commits), "commit since", "commits since")),
+		sinceTag,
 		headerStyle.Render(fmt.Sprintf("(%s)",
 			humanize.Time(repo.LastRelease.PublishedAt))),
 	)

@@ -10,4 +10,6 @@ type Commit struct {
 	MessageHeadline string
 	CommittedAt     time.Time
 	Author          string
+	URL             string
+	AuthorURL       string
 }

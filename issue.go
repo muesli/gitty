@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/gitty/vcs"
 	"github.com/muesli/reflow/truncate"
+	"github.com/muesli/termenv"
 )
 
 func printIssue(issue vcs.Issue, maxWidth int) {
@@ -20,7 +21,11 @@ func printIssue(issue vcs.Issue, maxWidth int) {
 		Foreground(lipgloss.Color(theme.colorDarkGray)).Width(80 - maxWidth)
 
 	var s string
-	s += numberStyle.Render(strconv.Itoa(issue.ID))
+	num := numberStyle.Render(strconv.Itoa(issue.ID))
+	if useLinks {
+		num = termenv.Hyperlink(issue.URL, num)
+	}
+	s += num
 	s += genericStyle.Render(" ")
 	s += titleStyle.Render(truncate.StringWithTail(issue.Title, uint(80-maxWidth), "…"))
 	s += genericStyle.Render(" ")

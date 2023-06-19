@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 	"github.com/muesli/gitty/vcs"
+	"github.com/muesli/termenv"
 )
 
 func repoRelease(repo vcs.Repo) {
@@ -51,8 +52,16 @@ func repoRelease(repo vcs.Repo) {
 	}
 
 	var s string
-	s += repoStyle.Render(repo.Name)
-	s += versionStyle.Render(" " + repo.LastRelease.TagName)
+	name := repoStyle.Render(repo.Name)
+	if useLinks {
+		name = termenv.Hyperlink(repo.URL, name)
+	}
+	s += name + " "
+	release := versionStyle.Render(repo.LastRelease.TagName)
+	if useLinks {
+		release = termenv.Hyperlink(repo.LastRelease.URL, release)
+	}
+	s += release
 	s += genericStyle.Render(" (")
 	s += dateStyle.Render(humanize.Time(repo.LastRelease.PublishedAt))
 	s += genericStyle.Render(", ")

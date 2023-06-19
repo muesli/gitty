@@ -38,7 +38,7 @@ func NewClient(baseURL, token string, preverified bool) (*Client, error) {
 
 	return &Client{
 		api:  client,
-		host: baseURL,
+		host: u.String(),
 	}, nil
 }
 
@@ -74,6 +74,7 @@ func (c *Client) Issues(owner string, name string) ([]vcs.Issue, error) {
 				ID:        int(v.ID),
 				Title:     v.Title,
 				CreatedAt: v.Created,
+				URL:       v.HTMLURL,
 			}
 			for _, l := range v.Labels {
 				issue.Labels = append(issue.Labels, vcs.Label{
@@ -115,6 +116,7 @@ func (c *Client) PullRequests(owner string, name string) ([]vcs.PullRequest, err
 				ID:        int(v.ID),
 				Title:     v.Title,
 				CreatedAt: *v.Created,
+				URL:       v.HTMLURL,
 			}
 			for _, l := range v.Labels {
 				pr.Labels = append(pr.Labels, vcs.Label{
@@ -222,7 +224,10 @@ func (c *Client) Branches(owner string, name string) ([]vcs.Branch, error) {
 					MessageHeadline: trimMessage(v.Commit.Message),
 					CommittedAt:     v.Commit.Timestamp,
 					Author:          v.Commit.Author.UserName,
+					URL:             v.Commit.URL,
+					AuthorURL:       fmt.Sprintf("%s/%s", c.host, v.Commit.Author.UserName),
 				},
+				URL: fmt.Sprintf("%s/%s/%s/src/branch/%s", c.host, owner, name, v.Name),
 			}
 			i = append(i, branch)
 		}
@@ -259,6 +264,8 @@ func (c *Client) History(repo vcs.Repo, max int, since time.Time) ([]vcs.Commit,
 				MessageHeadline: trimMessage(v.RepoCommit.Message),
 				CommittedAt:     v.Created,
 				Author:          v.Author.UserName,
+				URL:             v.HTMLURL,
+				AuthorURL:       fmt.Sprintf("%s/%s", c.host, v.Author.UserName),
 			})
 		}
 		if brk {
@@ -300,6 +307,7 @@ func (c *Client) repoFromAPI(p *gitea.Repository) vcs.Repo {
 			Name:        r[0].Title,
 			TagName:     r[0].TagName,
 			PublishedAt: r[0].CreatedAt,
+			URL:         r[0].HTMLURL,
 		}
 	}
 

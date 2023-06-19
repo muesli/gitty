@@ -34,6 +34,8 @@ var (
 	version = flag.Bool("version", false, "display version")
 
 	theme Theme
+
+	useLinks = os.Getenv("GITTY_LINKS") != ""
 )
 
 func parseRepository() {

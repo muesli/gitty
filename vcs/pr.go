@@ -11,4 +11,5 @@ type PullRequest struct {
 	Title     string
 	Labels    Labels
 	CreatedAt time.Time
+	URL       string
 }
